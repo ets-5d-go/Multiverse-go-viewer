@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>5D Go Viewer (Web Edition)</title>
+    <style>
+        body {
+            background: #222;
+            color: white;
+            font-family: sans-serif;
+        }
+
+        /* ★ 横並びにするためのコンテナ */
+        #container {
+            display: flex;
+            flex-direction: row;   /* 横並び */
+            justify-content: center;
+            align-items: flex-start;
+            gap: 10px;             /* 2D と 3D の間のスペース */
+            margin-top: 5px;
+        }
+
+        /* ★ 2D盤を「3格子下」に下げる（3 * 40px = 120px） */
+        #board {
+            border: 1px solid #555;
+            margin-top: 40px;
+            margin-left:120px
+        }
+
+        #viewer {
+            width: 900px;
+            height: 700px;
+            display: block;
+        }
+
+        /* ★ スライダーを 2D 盤の上に置きつつ「4格子上」に寄せる（4 * 40px = 160px） */
+        #layerControl {
+            text-align: center;
+            margin-top: 40px;      /* 上から少し余裕 */
+            margin-bottom: 160px;  /* 下方向を詰めて盤に近づける（実質上に寄る） */
+        }
+    </style>
+</head>
+<body>
+
+<h1 style="text-align:center; margin-bottom:20px;">
+    5D Go Viewer (Web Edition)
+</h1>    
+
+<!-- ★ 層選択 UI（2D盤の上に配置） -->
+<div id="layerControl">
+    <label>Layer: </label>
+    <input type="range" id="layerSlider" min="0" max="4" value="0">
+    <span id="layerValue">0</span>
+</div>
+<!-- ★ 五次元取りデモボタン（ここが正しい位置） -->
+<div style="text-align:center; margin-bottom:20px;">
+    <button id="demoButton" style="font-size:20px; padding:10px 20px;">
+        五次元取りデモ
+    </button>
+</div>
+
+<!-- ★ モード選択ボタン -->
+<div style="text-align:center; margin-bottom:20px;">
+    <button id="modeHumanVsAI">人間 vs AI</button>
+    <button id="modeAIVsAI">AI vs AI</button>
+</div>
+<!-- ★ AI強さボタン -->
+<div style="text-align:center; margin-bottom:20px;">
+    <button id="aiWeak">弱い（深さ1）</button>
+    <button id="aiNormal">普通（深さ2）</button>
+    <button id="aiStrong">強い（深さ3）</button>
+</div>
+
+<!-- ★ 横並びコンテナ -->
+<div id="container">
+    <!-- 2D 囲碁盤 -->
+    <canvas id="board" width="400" height="400"></canvas>
+
+    <!-- 3D Viewer -->
+    <canvas id="viewer"></canvas>
+</div>
+
+<!-- Three.js 読み込み -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+<!-- あなたのコード -->
+<script src="viewer.js"></script>
+<script src="board.js"></script>
+
+<script>
+window.addEventListener("load", () => {
+    initViewer();
+    window.viewerReady = true;   // ★ viewer 初期化完了フラグ
+});
+</script>
+
