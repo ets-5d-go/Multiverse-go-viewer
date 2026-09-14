@@ -14,11 +14,15 @@ let gameMode = "human_vs_ai";  // 初期モード
 const SIZE = 9;
 const CELL = 40;
 
-// 盤データ（LAYERS が初期化された後に作る）
-let board = Array.from({ length: LAYERS }, () =>
-Array.from({ length: SIZE }, () => Array(SIZE).fill(null))
-);
+// ★ viewer.js の LAYERS を安全に取得
+const LAYERS_SAFE = (typeof LAYERS === "number") ? LAYERS : 5;
+// ★ LAYERS を再宣言しない（絶対に const LAYERS を書かない）
 
+
+// 盤データ（LAYERS が初期化された後に作る）
+let board = Array.from({ length: LAYERS_SAFE }, () =>
+    Array.from({ length: SIZE }, () => Array(SIZE).fill(null))
+);
 // 現在の手番
 let currentColor = "black";
 
@@ -39,23 +43,15 @@ window.currentLayer = currentLayer;
 // ★ デモ中フラグ（クリック無効化用）
 let demoRunning = false;
 
-const slider = document.getElementById("layerSlider");
-const label  = document.getElementById("layerValue");
 
-slider.addEventListener("input", () => {
-window.currentLayerIndex = parseInt(slider.value, 10);
-label.textContent = window.currentLayerIndex;
 
-drawBoard();
-drawAllStones();
-});
 // -------------------------------
 // 盤を描く
 // -------------------------------
 function drawBoard() {
 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-ctx.strokeStyle = "#555";
+ctx.strokeStyle = "yellow";
 ctx.lineWidth = 1;
 
 for (let i = 0; i < SIZE; i++) {
@@ -219,7 +215,7 @@ for (let [dx, dy, dz] of dirs) {
 
     if (nx >= 0 && nx < SIZE &&
         ny >= 0 && ny < SIZE &&
-        nz >= 0 && nz < LAYERS) {
+        nz >= 0 && nz < LAYERS_SAFE) {
 
         if (board[nz][ny][nx] === null) {
             return true;
@@ -249,7 +245,7 @@ let nz = z + dz;
 
 if (nx >= 0 && nx < SIZE &&
     ny >= 0 && ny < SIZE &&
-    nz >= 0 && nz < LAYERS) {
+    nz >= 0 && nz < LAYERS_SAFE) {
 
     if (board[nz][ny][nx] === enemy) {
         let group = getGroup(nx, ny, nz, enemy);
@@ -295,7 +291,7 @@ let nz = z + dz;
 
 if (nx >= 0 && nx < SIZE &&
     ny >= 0 && ny < SIZE &&
-    nz >= 0 && nz < LAYERS) {
+    nz >= 0 && nz < LAYERS_SAFE) {
 
     if (board[nz][ny][nx] === enemy) {
         let g = getGroup(nx, ny, nz, enemy);
@@ -334,7 +330,7 @@ return true;
 function getLegalMoves(color) {
 let moves = [];
 
-for (let z = 0; z < LAYERS; z++) {
+for (let z = 0; z < LAYERS_SAFE; z++) {
 for (let y = 0; y < SIZE; y++) {
     for (let x = 0; x < SIZE; x++) {
         if (isLegalMove(x, y, z, color)) {
@@ -359,7 +355,7 @@ let dist2D = Math.abs(x - center) + Math.abs(y - center);
 score += (10 - dist2D);  // 中央ほど高い
 
 // ② 層の中央に近いほど高評価
-const layerCenter = (LAYERS - 1) / 2;
+const layerCenter = (LAYERS_SAFE - 1) / 2;
 let distZ = Math.abs(z - layerCenter);
 score += (5 - distZ);
 
@@ -382,7 +378,7 @@ let nz = cz + dz;
 
 if (nx >= 0 && nx < SIZE &&
     ny >= 0 && ny < SIZE &&
-    nz >= 0 && nz < LAYERS) {
+    nz >= 0 && nz < LAYERS_SAFE) {
 
     if (board[nz][ny][nx] === null) {
         myLibertyCount++;
@@ -404,7 +400,7 @@ let nz = z + dz;
 
 if (nx >= 0 && nx < SIZE &&
 ny >= 0 && ny < SIZE &&
-nz >= 0 && nz < LAYERS) {
+nz >= 0 && nz < LAYERS_SAFE) {
 
 if (board[nz][ny][nx] === enemy) {
     let g = getGroup(nx, ny, nz, enemy);
@@ -444,7 +440,7 @@ let key = `${cx},${cy},${cz}`;
 if (visited.has(key)) continue;
 visited.add(key);
 
-if (cz < 0 || cz >= LAYERS) continue;
+if (cz < 0 || cz >= LAYERS_SAFE) continue;
 if (cy < 0 || cy >= SIZE)   continue;
 if (cx < 0 || cx >= SIZE)   continue;
 
@@ -464,7 +460,7 @@ for (let [dx, dy, dz] of dirs) {
 
     if (nx >= 0 && nx < SIZE &&
         ny >= 0 && ny < SIZE &&
-        nz >= 0 && nz < LAYERS) {
+        nz >= 0 && nz < LAYERS_SAFE) {
         stack.push([nx, ny, nz]);
     }
 }
@@ -491,7 +487,7 @@ let nz = z + dz;
 
 if (nx >= 0 && nx < SIZE &&
     ny >= 0 && ny < SIZE &&
-    nz >= 0 && nz < LAYERS) {
+    nz >= 0 && nz < LAYERS_SAFE) {
 
     if (boardSim[nz][ny][nx] === null) {
         return true;   // 呼吸点あり
@@ -508,7 +504,7 @@ return false;  // 呼吸点なし
 function getLegalMovesSim(boardSim, color) {
 let moves = [];
 
-for (let z = 0; z < LAYERS; z++) {
+for (let z = 0; z < LAYERS_SAFE; z++) {
 for (let y = 0; y < SIZE; y++) {
 for (let x = 0; x < SIZE; x++) {
 
@@ -555,7 +551,7 @@ let nz = z + dz;
 
 if (nx >= 0 && nx < SIZE &&
 ny >= 0 && ny < SIZE &&
-nz >= 0 && nz < LAYERS) {
+nz >= 0 && nz < LAYERS_SAFE) {
 
 if (boardSim[nz][ny][nx] === enemy) {
     let g = getGroupSim(boardSim, nx, ny, nz, enemy);
@@ -605,7 +601,7 @@ let nz = z + dz;
 
 if (nx >= 0 && nx < SIZE &&
 ny >= 0 && ny < SIZE &&
-nz >= 0 && nz < LAYERS) {
+nz >= 0 && nz < LAYERS_SAFE) {
 
 if (boardSim[nz][ny][nx] === enemy) {
     let g = getGroupSim(boardSim, nx, ny, nz, enemy);
@@ -626,9 +622,9 @@ function evaluateBoard(boardState) {
 let score = 0;
 
 const center = (SIZE - 1) / 2;
-const layerCenter = (LAYERS - 1) / 2;
+const layerCenter = (LAYERS_SAFE - 1) / 2;
 
-for (let z = 0; z < LAYERS; z++) {
+for (let z = 0; z < LAYERS_SAFE; z++) {
 for (let y = 0; y < SIZE; y++) {
 for (let x = 0; x < SIZE; x++) {
 
@@ -664,7 +660,7 @@ for (let x = 0; x < SIZE; x++) {
 
             if (nx >= 0 && nx < SIZE &&
                 ny >= 0 && ny < SIZE &&
-                nz >= 0 && nz < LAYERS) {
+                nz >= 0 && nz < LAYERS_SAFE) {
 
                 if (boardState[nz][ny][nx] === null) {
                     libertyCount++;

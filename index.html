@@ -47,12 +47,29 @@
     5D Go Viewer (Web Edition)
 </h1>    
 
-<!-- ★ 層選択 UI（2D盤の上に配置） -->
-<div id="layerControl">
-    <label>Layer: </label>
-    <input type="range" id="layerSlider" min="0" max="4" value="0">
-    <span id="layerValue">0</span>
+<!-- 層切り替えボタン -->
+<div id="layerButtons" style="margin-bottom: 10px;">
+  <button onclick="setLayer(0)">1層目（最下部）</button>
+  <button onclick="setLayer(1)">2層目</button>
+  <button onclick="setLayer(2)">3層目</button>
+  <button onclick="setLayer(3)">4層目</button>
+  <button onclick="setLayer(4)">5層目（最上部）</button>
 </div>
+
+<style>
+#layerButtons button {
+    padding: 6px 12px;
+    margin-right: 6px;
+    background-color: #eee;
+    border: 1px solid #888;
+    border-radius: 4px;
+    cursor: pointer;
+}
+#layerButtons button:hover {
+    background-color: #ddd;
+}
+</style>
+
 <!-- ★ 五次元取りデモボタン（ここが正しい位置） -->
 <div style="text-align:center; margin-bottom:20px;">
     <button id="demoButton" style="font-size:20px; padding:10px 20px;">

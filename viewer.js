@@ -3,8 +3,73 @@
 // ===============================
 const LAYERS = 5;        // 盤の層数
 const LAYER_HEIGHT = 12; // 層の高さ間隔
-// ★ 3D 石オブジェクト管理辞書（ここに置く！）
+
+// ★ 盤設定（グローバルに出す）
+const BOARD_SIZE   = 9;
+const BOARD_SPACING = 5;
+const BOARD_Y      = 2;
+
+// ★ 3D 石オブジェクト管理辞書
 window.stoneObjects = {};
+
+// ★ Three.js のシーンを先に作って公開する（ここが重要）
+window.scene = new THREE.Scene();
+window.scene.background = new THREE.Color(0x888888);
+// ★ 層ボタンで層を変更する（グローバル）
+
+
+function setLayer(z) {
+    window.currentLayerIndex = z;
+
+    // ★ 2D 盤を更新
+    if (typeof drawBoard === "function") {
+        drawBoard();
+    }
+    if (typeof drawAllStones === "function") {
+        drawAllStones();
+    
+    }
+    // ★ 3D グリッドを再生成（色を更新するため）
+    if (typeof window.rebuildGrid === "function") {
+        window.rebuildGrid();
+    }
+}
+window.setLayer = setLayer;
+// ★ 3D 石を置く（グローバル）
+function addStone3D(x, y, color, layer) {
+    const radius = 2;
+    const geometry = new THREE.SphereGeometry(radius, 32, 32);
+    const material = new THREE.MeshPhongMaterial({
+        color: (color === "black") ? 0x000000 : 0xffffff
+    });
+
+    const stone = new THREE.Mesh(geometry, material);
+
+
+    const half = (BOARD_SIZE - 1) * BOARD_SPACING / 2;
+
+    const posX = -half + x * BOARD_SPACING;
+    const posZ = -half + y * BOARD_SPACING;
+    const posY = BOARD_Y + layer * LAYER_HEIGHT;
+
+    stone.position.set(posX, posY, posZ);
+    window.scene.add(stone);   // ★ scene をグローバルに公開する必要あり
+
+    const key = `${x},${y},${layer}`;
+    window.stoneObjects[key] = stone;
+}
+window.addStone3D = addStone3D;
+
+// ★ 3D 石を消す（グローバル）
+function removeStone3D(x, y, layer) {
+    const key = `${x},${y},${layer}`;
+    const obj = window.stoneObjects[key];
+    if (obj) {
+        window.scene.remove(obj);
+        delete window.stoneObjects[key];
+    }
+}
+window.removeStone3D = removeStone3D;
 // 3D Viewer (Three.js)
 // ===============================
 function initViewer() {
@@ -20,15 +85,9 @@ function initViewer() {
     renderer.setSize(viewer.clientWidth, viewer.clientHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
 
-    // 盤設定
-    const BOARD_SIZE = 9;
-    const BOARD_SPACING = 5;
-    const BOARD_Y = 2;
 
-    // シーン
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x222222);
 
+   
       // ★ board.js がまだ読み込まれていない場合の保険
     function currentLayerSafe() {
         if (typeof window.currentLayer === "function") {
@@ -36,18 +95,7 @@ function initViewer() {
         }
         return 0; // とりあえず 0 層
     }  
-    // ★ ここに removeStone3D を入れる！
-    function removeStone3D(x, y, layer) {
-        const key = `${x},${y},${layer}`;
-        const obj = window.stoneObjects[key];
-        if (obj) {
-            scene.remove(obj);
-            delete window.stoneObjects[key];
-        }
-    }
 
-    // 公開（board.js から呼べるように）
-    window.removeStone3D = removeStone3D;
 
     // カメラ
     const camera = new THREE.PerspectiveCamera(
@@ -64,13 +112,18 @@ function initViewer() {
 // 3D 囲碁盤グリッド（層対応版）
 // ===============================
 function createBoardGrid(layer) {
+
+    // ★ 入力中の層だけ黄色、それ以外は黒
+    const color = (layer === currentLayerSafe()) ? 0xffff00 : 0x000000;
+
+    // ★ 入力中の層は濃く、他の層は薄く
     const opacity = (layer === currentLayerSafe()) ? 1.0 : 0.25;
+
     const material = new THREE.LineBasicMaterial({
-        color: 0xaaaaaa,
+        color: color,
         transparent: true,
         opacity: opacity
     });
-
     const half = (BOARD_SIZE - 1) * BOARD_SPACING / 2;
 
     // ★ 層ごとに高さを変える
@@ -90,13 +143,14 @@ function createBoardGrid(layer) {
                 new Float32Array([
                     -half, y, z,
                      half, y, z
+                     
                 ]),
                 3
             )
         );
 
         const line = new THREE.Line(geometry, material);
-        scene.add(line);
+        window.scene.add(line);
     }
 
     // -------------------------------
@@ -119,16 +173,17 @@ function createBoardGrid(layer) {
         );
 
         const line = new THREE.Line(geometry, material);
-        scene.add(line);
+        window.scene.add(line);
     }
 }   
 for (let layer = 0; layer < LAYERS; layer++) {
     createBoardGrid(layer);
 }
+
 // ライト
     const light = new THREE.PointLight(0xffffff, 1);
     light.position.set(50, 80, 120);
-    scene.add(light);
+    window.scene.add(light);
 
     // カメラ操作
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -137,35 +192,33 @@ for (let layer = 0; layer < LAYERS; layer++) {
     // アニメーション
     function animate() {
         controls.update();
-        renderer.render(scene, camera);
+        renderer.render(window.scene, camera);
         requestAnimationFrame(animate);
     }
 
 
-// 石を置く（層対応版）
-function addStone3D(x, y, color, layer ) {
-    const radius = 5;
-    const geometry = new THREE.SphereGeometry(radius, 32, 32);
-    const material = new THREE.MeshPhongMaterial({
-        color: (color === "black") ? 0x000000 : 0xffffff
-    });
 
-    const stone = new THREE.Mesh(geometry, material);
-
-    const half = (BOARD_SIZE - 1) * BOARD_SPACING / 2;
-    const posX = -half + x * BOARD_SPACING;
-    const posZ = -half + y * BOARD_SPACING;
-    const posY = radius + layer * LAYER_HEIGHT;
-
-    stone.position.set(posX, posY, posZ);
-    scene.add(stone);
-
-    // ★ 石を記録（キーは x,y,z）
-    const key = `${x},${y},${layer}`;
-    window.stoneObjects[key] = stone;
-}
 // ★ これを必ず追加
 window.addStone3D = addStone3D;
+
+    // ★ 3D グリッドを再生成（層色の更新用）
+    function rebuildGrid() {
+
+        // ★ 既存のグリッド線(Line)を全部削除
+        for (let i = window.scene.children.length - 1; i >= 0; i--) {
+            const obj = window.scene.children[i];
+            if (obj.type === "Line") {
+                window.scene.remove(obj);
+            }
+        }
+
+        // ★ 新しいグリッドを層ごとに生成
+        for (let layer = 0; layer < LAYERS; layer++) {
+            createBoardGrid(layer);
+        }
+    }
+    // ★ rebuildGrid をグローバル公開
+    window.rebuildGrid = rebuildGrid;
     // ★ これが絶対に必要
     animate();
-}   // ★ initViewer の閉じ
+}   
