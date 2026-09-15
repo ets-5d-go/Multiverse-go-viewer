@@ -11,7 +11,7 @@ let aiDepth = 1;   // 初期値：弱い
 let gameMode = "human_vs_ai";  // 初期モード
 
 // 盤サイズ
-const SIZE = 9;
+const SIZE = 5;
 const CELL = 40;
 
 // ★ viewer.js の LAYERS を安全に取得
@@ -721,31 +721,29 @@ return bestScore;
 // 五次元取りデモ
 // -------------------------------
 const demoMoves = [
-{color: "black", x: 4, y: 4, z: 0},
-{color: "white", x: 3, y: 4, z: 0},
-{color: "white", x: 5, y: 4, z: 0},
-{color: "white", x: 4, y: 3, z: 0},
-{color: "white", x: 4, y: 5, z: 0},
+    // --- 黒石：三層目中央 ---
+    {color: "black", x: 2, y: 2, z: 2},
 
-{color: "black", x: 0, y: 0, z: 0},
+    // --- 白石：三層目（z=2）前後左右で包囲 ---
+    {color: "white", x: 1, y: 2, z: 2}, // 左
+    {color: "black", x: 4, y: 0, z: 0}, // 黒石は最下層の奥へ
+    {color: "white", x: 3, y: 2, z: 2}, // 右
+    {color: "black", x: 4, y: 1, z: 0},
+    {color: "white", x: 2, y: 1, z: 2}, // 上
+    {color: "black", x: 4, y: 2, z: 0},
+    {color: "white", x: 2, y: 3, z: 2}, // 下
+    {color: "black", x: 4, y: 3, z: 0},
 
-{color: "white", x: 4, y: 4, z: 1},
-{color: "white", x: 3, y: 4, z: 1},
-{color: "white", x: 5, y: 4, z: 1},
-{color: "white", x: 4, y: 3, z: 1},
-{color: "white", x: 4, y: 5, z: 1},
+    // --- 白石：二層目（z=1）黒石の真下 ---
+    {color: "white", x: 2, y: 2, z: 1},
+    {color: "black", x: 4, y: 4, z: 0},
 
-{color: "black", x: 8, y: 8, z: 0},
+    // --- 白石：四層目（z=3）黒石の真上 ---
+    {color: "white", x: 2, y: 2, z: 3},
 
-{color: "white", x: 4, y: 4, z: 2},
-{color: "white", x: 3, y: 4, z: 2},
-{color: "white", x: 5, y: 4, z: 2},
-{color: "white", x: 4, y: 3, z: 2},
-{color: "white", x: 4, y: 5, z: 2},
-
-{color: "white", x: 4, y: 4, z: 3}
+    // --- 最後：黒石が消える（白石は置かない） ---
+    // removeCapturedStones が黒石を消すので、ここで終了
 ];
-
 
 function runDemo() {
 demoRunning = true;
@@ -790,10 +788,9 @@ function getLegalMovesOnCurrentLayer(color) {
     return moves;
 }
 // -------------------------------
-// 黒白AIの着手（ミニマックス版）
+// 白と黒AIの着手（ミニマックス版）
 // -------------------------------
 function aiPlay() {
-
     // 1. 白AIの合法手を全部取得
     let moves = getLegalMoves("white");
     if (moves.length === 0) {
@@ -818,6 +815,13 @@ function aiPlay() {
 
     // 3. 最善手を実際に打つ
     let {x, y, z} = bestMove;
+    // ★ AI の着手層をハイライトに反映
+    window.currentLayerIndex = z;
+
+    // ★ 3D グリッドを更新
+    if (typeof window.rebuildGrid === "function") {
+        window.rebuildGrid();
+    }
 
     board[z][y][x] = "white";
     addStone3D(x, y, "white", z);
@@ -827,17 +831,14 @@ function aiPlay() {
     drawBoard();
     drawAllStones();
 
-    // 手番を黒に戻す
     currentColor = "black";
 
-    // ★ AI vs AI の場合は黒AIを続けて呼ぶ
     if (gameMode === "ai_vs_ai") {
         setTimeout(() => aiPlayBlack(), 500);
     }
 }
 function aiPlayBlack() {
 
-    // 黒AIの合法手を全部取得
     let moves = getLegalMoves("black");
     if (moves.length === 0) {
         console.log("黒AIは打てる手がありません（パス）");
@@ -846,12 +847,12 @@ function aiPlayBlack() {
     }
 
     let bestMove = null;
-    let bestScore = Infinity;  // 黒は最小化
+    let bestScore = Infinity;
 
     for (let mv of moves) {
         let sim = cloneBoard(board);
         simulateMove(sim, mv.x, mv.y, mv.z, "black");
-        let score = minimax(sim, aiDepth, true);  // 白が最大化
+        let score = minimax(sim, aiDepth, true);
         if (score < bestScore) {
             bestScore = score;
             bestMove = mv;
@@ -860,6 +861,11 @@ function aiPlayBlack() {
 
     let {x, y, z} = bestMove;
 
+    // ★ ここを追加：層ハイライトをAIの着手層に合わせる
+    window.currentLayerIndex = z;
+    if (typeof window.rebuildGrid === "function") {
+        window.rebuildGrid();
+    }
     board[z][y][x] = "black";
     addStone3D(x, y, "black", z);
     removeCapturedStones(x, y, z, "black");
@@ -869,12 +875,10 @@ function aiPlayBlack() {
 
     currentColor = "white";
 
-    // ★ AI vs AI の場合は白AIを続けて呼ぶ
     if (gameMode === "ai_vs_ai") {
         setTimeout(() => aiPlay(), 500);
     }
 }
-
 // ★ デモボタン
 document.getElementById("demoButton").addEventListener("click", runDemo);
 
@@ -914,4 +918,45 @@ document.getElementById("aiStrong").addEventListener("click", () => {
     aiDepth = 3;
     console.log("AI強さ：強い（深さ3）");
 });
+// ★ クリヤーボタン
+document.getElementById("clearBoard").addEventListener("click", () => {
+    clearAllBoards();
+});
+// ===============================
+// ★ 盤クリヤー（2D + 3D 全消去）
+// ===============================
+function clearAllBoards() {
 
+    // ★ 2D 盤データを初期化
+    for (let z = 0; z < LAYERS_SAFE; z++) {
+        for (let y = 0; y < SIZE; y++) {
+            for (let x = 0; x < SIZE; x++) {
+                board[z][y][x] = null;
+            }
+        }
+    }
+
+    // ★ 3D 石を全部削除
+    for (const key in window.stoneObjects) {
+        const obj = window.stoneObjects[key];
+        window.scene.remove(obj);
+        delete window.stoneObjects[key];
+    }
+    // ★ 層を必ず 0 に戻す（最重要）
+    window.currentLayerIndex = 0;
+    
+    // ★ 2D 盤を再描画
+    drawBoard();
+    drawAllStones();
+
+    // ★ 3D グリッドを再生成（層色の更新）
+    if (typeof window.rebuildGrid === "function") {
+        window.rebuildGrid();
+    }
+
+    // ★ 手番を黒に戻す
+    currentColor = "black";
+
+    console.log("盤を初期化しました");
+}
+window.clearAllBoards = clearAllBoards;

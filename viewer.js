@@ -5,7 +5,7 @@ const LAYERS = 5;        // 盤の層数
 const LAYER_HEIGHT = 12; // 層の高さ間隔
 
 // ★ 盤設定（グローバルに出す）
-const BOARD_SIZE   = 9;
+const BOARD_SIZE   = 5;
 const BOARD_SPACING = 5;
 const BOARD_Y      = 2;
 
@@ -114,11 +114,9 @@ function initViewer() {
 function createBoardGrid(layer) {
 
     // ★ 入力中の層だけ黄色、それ以外は黒
-    const color = (layer === currentLayerSafe()) ? 0xffff00 : 0x000000;
-
+    const color = (layer === window.currentLayerIndex) ? 0xffff00 : 0x000000;
     // ★ 入力中の層は濃く、他の層は薄く
-    const opacity = (layer === currentLayerSafe()) ? 1.0 : 0.25;
-
+    const opacity = (layer === window.currentLayerIndex) ? 1.0 : 0.25;
     const material = new THREE.LineBasicMaterial({
         color: color,
         transparent: true,
