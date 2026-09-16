@@ -2,29 +2,98 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>5D Go Viewer (Web Edition)</title>
+    <title>多次元囲碁世界（仮称）</title>
+
     <style>
         body {
-            background: #222;
+            background: #000;
             color: white;
             font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* ★ タイトル画面：全画面レイヤー */
+        #titleScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #222 0%, #000 60%);
+            color: #fff;
+            z-index: 9999;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #titleScreen .title-inner {
+            text-align: center;
+            padding: 20px 40px;
+            border: 1px solid #888;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        #titleScreen h1 {
+            margin-bottom: 16px;
+            font-size: 28px;
+        }
+
+        #titleScreen p {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        #startButton {
+            padding: 8px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        /* ★ 幕アニメ（左下 → 右上へ巻き上がる） */
+        #titleScreen.hide {
+            animation: curtainUp 1.8s ease forwards;
+        }
+
+        @keyframes curtainUp {
+            0% {
+                transform: translateX(-100%) translateY(100%);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(100%) translateY(-100%);
+                opacity: 0;
+            }
+        }
+
+        /* ★ ゲーム画面フェードイン */
+        #gameContainer {
+            opacity: 0;
+            transition: opacity 1.5s ease;
+        }
+
+        #gameContainer.show {
+            opacity: 1;
         }
 
         /* ★ 横並びにするためのコンテナ */
         #container {
             display: flex;
-            flex-direction: row;   /* 横並び */
+            flex-direction: row;
             justify-content: center;
             align-items: flex-start;
-            gap: 10px;             /* 2D と 3D の間のスペース */
+            gap: 20px;
             margin-top: 5px;
         }
 
-        /* ★ 2D盤を「3格子下」に下げる（3 * 40px = 120px） */
         #board {
             border: 1px solid #555;
             margin-top: 40px;
-            margin-left:120px
+            margin-left: 120px;
         }
 
         #viewer {
@@ -33,90 +102,204 @@
             display: block;
         }
 
-        /* ★ スライダーを 2D 盤の上に置きつつ「4格子上」に寄せる（4 * 40px = 160px） */
-        #layerControl {
-            text-align: center;
-            margin-top: 40px;      /* 上から少し余裕 */
-            margin-bottom: 160px;  /* 下方向を詰めて盤に近づける（実質上に寄る） */
+        /* ★ 光沢ボタン（青） */
+
+        .videoButton.blue {
+            padding: 6px 12px;          /* 黄色と同じ */
+            margin-right: 6px;          /* 黄色と同じ */
+            background: linear-gradient(#4da3ff, #0066cc);
+            border: 2px solid #004c99;
+            border-radius: 4px;         /* 黄色と同じ */
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 6px rgba(0,120,255,0.6);
+            transition: 0.2s;
+            width: auto;                /* これが重要！ */
         }
+        .videoButton.blue:hover {
+            background: linear-gradient(#66b5ff, #0077ee);
+        }        
+        /* ★ 光沢ボタン（赤） */
+        .videoButton.red {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: linear-gradient(#ff6666, #cc0000);
+            border: 2px solid #990000;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(255,80,80,0.6);
+            transition: 0.2s;
+        }
+        .videoButton.red:hover {
+            background: linear-gradient(#ff8080, #dd0000);
+            box-shadow: 0 0 12px rgba(255,120,120,0.9);
+        }
+
+        /* ★ 光沢ボタン（黄色） */
+        .videoButton.yellow {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: linear-gradient(#fff27a, #e6c300);
+            border: 2px solid #b59a00;
+            border-radius: 6px;
+            color: #333;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(255,220,50,0.6);
+            transition: 0.2s;
+        }
+        .videoButton.yellow:hover {
+            background: linear-gradient(#fff8a5, #f0d000);
+            box-shadow: 0 0 12px rgba(255,240,80,0.9);
+        }
+
+        /* 層ボタン（黄色に変更） */
+        #layerButtons button {
+            padding: 6px 12px;
+            margin-right: 6px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #layerButtons button {
+            background: linear-gradient(#fff27a, #e6c300);
+            border: 2px solid #b59a00;
+            color: #333;
+            font-weight: bold;
+        }
+        #layerButtons button:hover {
+            background: linear-gradient(#fff8a5, #f0d000);
+        }
+
     </style>
 </head>
+
 <body>
 
-<h1 style="text-align:center; margin-bottom:20px;">
-    5D Go Viewer (Web Edition)
-</h1>    
+    <!-- ★ タイトル画面レイヤー -->
+    <div id="titleScreen">
+        <div class="title-inner">
+            <h1>多次元囲碁世界（仮称）</h1>
+            <p>
+                ・層ボタンで上下の世界を切り替えます。<br>
+                ・盤をクリックして石を置きます。<br>
+                ・モードボタンで対戦形式を選べます。
+            </p>
+            <button id="startButton">ゲーム開始</button>
+        </div>
+    </div>
 
-<!-- 層切り替えボタン -->
-<div id="layerButtons" style="margin-bottom: 10px;">
-  <button onclick="setLayer(0)">1層目（最下部）</button>
-  <button onclick="setLayer(1)">2層目</button>
-  <button onclick="setLayer(2)">3層目</button>
-  <button onclick="setLayer(3)">4層目</button>
-  <button onclick="setLayer(4)">5層目（最上部）</button>
-</div>
+    <!-- ★ ゲーム本体レイヤー -->
+    <div id="gameContainer">
 
-<style>
-#layerButtons button {
-    padding: 6px 12px;
-    margin-right: 6px;
-    background-color: #eee;
-    border: 1px solid #888;
-    border-radius: 4px;
-    cursor: pointer;
-}
-#layerButtons button:hover {
-    background-color: #ddd;
-}
-</style>
+        <h1 style="text-align:center; margin-bottom:20px;">
+            5D Go Viewer (Web Edition)
+        </h1>
 
-<!-- ★ 五次元取りデモボタン（ここが正しい位置） -->
-<div style="text-align:center; margin-bottom:20px;">
-    <button id="demoButton" style="font-size:20px; padding:10px 20px;">
-        五次元取りデモ
-    </button>
-</div>
-<!-- ★ 盤クリヤーボタン -->
-<div style="text-align:center; margin-bottom:20px;">
-    <button id="clearBoard" style="font-size:20px; padding:10px 20px;">
-        クリヤー（盤を初期化）
-    </button>
-</div>
-<!-- ★ モード選択ボタン -->
-<div style="text-align:center; margin-bottom:20px;">
-    <button id="modeHumanVsHuman">人間 vs 人間</button>  <!-- ★ ここに追加 -->
-    <button id="modeHumanVsAI">人間 vs AI</button>
-    <button id="modeAIVsAI">AI vs AI</button>
+        <!-- 層切り替えボタン（黄色） -->
+        <div id="layerButtons" style="margin-bottom: 10px;">
+            <button onclick="setLayer(0)">1層目（最下部）</button>
+            <button onclick="setLayer(1)">2層目</button>
+            <button onclick="setLayer(2)">3層目</button>
+            <button onclick="setLayer(3)">4層目</button>
+            <button onclick="setLayer(4)">5層目（最上部）</button>
+        </div>
 
-</div>
-<!-- ★ AI強さボタン -->
-<div style="text-align:center; margin-bottom:20px;">
-    <button id="aiWeak">弱い（深さ1）</button>
-    <button id="aiNormal">普通（深さ2）</button>
-    <button id="aiStrong">強い（深さ3）</button>
-</div>
+        <!-- 五次元取りデモ（青） -->
+        <div style="text-align:center; margin-bottom:20px;">
+            <button class="videoButton blue" id="demoButton" style="font-size:20px; padding:10px 20px;">
+                五次元取りデモ
+            </button>
+        </div>
 
-<!-- ★ 横並びコンテナ -->
-<div id="container">
-    <!-- 2D 囲碁盤 -->
-    <canvas id="board" width="300" height="300"></canvas>
+        <!-- 盤クリヤー（青） -->
+        <div style="text-align:center; margin-bottom:20px;">
+            <button class="videoButton blue" id="clearBoard" style="font-size:20px; padding:10px 20px;">
+                クリヤー（盤を初期化）
+            </button>
+        </div>
 
-    <!-- 3D Viewer -->
-    <canvas id="viewer"></canvas>
-</div>
+        <!-- モード選択（青） -->
+        <div style="text-align:center; margin-bottom:20px;">
+            <button class="videoButton blue" id="modeHumanVsHuman">人間 vs 人間</button>
+            <button class="videoButton blue" id="modeHumanVsAI">人間 vs AI</button>
+            <button class="videoButton blue" id="modeAIVsAI">AI vs AI</button>
+        </div>
 
-<!-- Three.js 読み込み -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+        <!-- AI強さ（青） -->
+        <div style="text-align:center; margin-bottom:20px;">
+            <button class="videoButton blue" id="aiWeak">弱い（深さ1）</button>
+            <button class="videoButton blue" id="aiNormal">普通（深さ2）</button>
+            <button class="videoButton blue" id="aiStrong">強い（深さ3）</button>
+        </div>
 
-<!-- あなたのコード -->
-<script src="viewer.js"></script>
-<script src="board.js"></script>
+        <!-- 横並びコンテナ -->
+        <div id="container">
+            <canvas id="board" width="300" height="300"></canvas>
+            <canvas id="viewer"></canvas>
 
-<script>
-window.addEventListener("load", () => {
-    initViewer();
-    window.viewerReady = true;   // ★ viewer 初期化完了フラグ
-});
-</script>
+            <!-- ★ 動画ボタンエリア（赤） -->
+            <div id="videoPanel">
+                <h2>多次元囲碁動画</h2>
 
+                <button class="videoButton red" onclick="playVideo('video2d.mp4')">２次元</button>
+                <button class="videoButton red" onclick="playVideo('video3d.mp4')">３次元</button>
+                <button class="videoButton red" onclick="playVideo('video4d.mp4')">４次元</button>
+                <button class="videoButton red" onclick="playVideo('video5d.mp4')">５次元</button>
+            </div>
+        </div>
+
+    </div> <!-- gameContainer 終わり -->
+
+    <!-- Three.js -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <!-- あなたのコード -->
+    <script src="viewer.js"></script>
+    <script src="board.js"></script>
+
+    <!-- ★ タイトル画面 → ゲーム開始演出 -->
+    <script>
+        window.addEventListener("DOMContentLoaded", () => {
+            const titleScreen = document.getElementById("titleScreen");
+            const startButton = document.getElementById("startButton");
+            const gameContainer = document.getElementById("gameContainer");
+
+            startButton.addEventListener("click", () => {
+
+                // 1. 幕アニメ開始
+                titleScreen.classList.add("hide");
+
+                // 2. 宇宙背景を表示
+                setTimeout(() => {
+                    document.body.style.backgroundImage = "url('space_nasa.jpg')";
+                    document.body.style.backgroundSize = "cover";
+                    document.body.style.backgroundPosition = "center";
+                    document.body.style.backgroundAttachment = "fixed";
+                }, 1800);
+
+                // 3. ゲーム画面フェードイン
+                setTimeout(() => {
+                    gameContainer.classList.add("show");
+                }, 2000);
+            });
+        });
+
+        window.addEventListener("load", () => {
+            initViewer();
+            window.viewerReady = true;
+        });
+
+        /* ★ 動画再生（仮） */
+        function playVideo(filename) {
+            alert("動画 " + filename + " を再生します（後で実装）");
+        }
+    </script>
+
+</body>
+</html>
