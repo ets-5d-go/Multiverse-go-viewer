@@ -47,12 +47,13 @@ function addStone3D(x, y, color, layer) {
 
 
     const half = (BOARD_SIZE - 1) * BOARD_SPACING / 2;
-
     const posX = -half + x * BOARD_SPACING;
     const posZ = -half + y * BOARD_SPACING;
+
     const posY = BOARD_Y + layer * LAYER_HEIGHT;
 
     stone.position.set(posX, posY, posZ);
+
     window.scene.add(stone);   // ★ scene をグローバルに公開する必要あり
 
     const key = `${x},${y},${layer}`;
@@ -104,7 +105,7 @@ function initViewer() {
         0.1,
         1000
     );
-    camera.position.set(0, 50, 120);
+    camera.position.set(0, 60, 140);
     camera.lookAt(0, BOARD_Y, 0);
 
 
@@ -148,6 +149,7 @@ function createBoardGrid(layer) {
         );
 
         const line = new THREE.Line(geometry, material);
+          
         window.scene.add(line);
     }
 
@@ -171,6 +173,7 @@ function createBoardGrid(layer) {
         );
 
         const line = new THREE.Line(geometry, material);
+     
         window.scene.add(line);
     }
 }   
