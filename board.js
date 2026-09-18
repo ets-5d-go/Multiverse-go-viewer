@@ -773,6 +773,10 @@ function runDemo() {
         const mv = demoMoves[i];
         window.currentLayerIndex = mv.z;
 
+// ★ 追加（黄色ハイライトを動かす）
+if (typeof window.rebuildGrid === "function") {
+    window.rebuildGrid();
+}        
         board[mv.z][mv.y][mv.x] = mv.color;
         addStone3D(mv.x, mv.y, mv.color, mv.z);
         removeCapturedStones(mv.x, mv.y, mv.z, mv.color);
@@ -966,15 +970,9 @@ document.getElementById("aiNormal").addEventListener("click", () => {
     console.log("AI強さ：普通（深さ2）");
 });
 
-document.getElementById("aiStrong").addEventListener("click", () => {
-    aiDepth = 3;
-    console.log("AI強さ：強い（深さ3）");
-});
 
-// ★ クリヤーボタン
-document.getElementById("clearBoard").addEventListener("click", () => {
-    clearAllBoards();
-});
+
+
 
 // ===============================
 // ★ 盤クリヤー（2D + 3D 全消去）
@@ -1032,4 +1030,7 @@ function clearAllBoards() {
 
     console.log("盤を初期化しました");
 }
-window.clearAllBoards = clearAllBoards;
+window.addEventListener("load", () => {
+    document.getElementById("clearBoard").addEventListener("click", clearAllBoards);
+});
+window.stoneObjects = {};

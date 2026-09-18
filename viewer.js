@@ -14,7 +14,8 @@ window.stoneObjects = {};
 
 // ★ Three.js のシーンを先に作って公開する（ここが重要）
 window.scene = new THREE.Scene();
-window.scene.background = new THREE.Color(0x888888);
+window.scene.background = null;   // ★ 背景を透明にする
+
 // ★ 層ボタンで層を変更する（グローバル）
 
 
@@ -79,10 +80,12 @@ function initViewer() {
     const viewer = document.getElementById("viewer");
 
     // レンダラー
-    const renderer = new THREE.WebGLRenderer({
-        canvas: viewer,
-        antialias: true
-    });
+const renderer = new THREE.WebGLRenderer({
+    canvas: viewer,
+    antialias: true,
+    alpha: true   // ★ 透明背景を許可
+});
+
     renderer.setSize(viewer.clientWidth, viewer.clientHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
 

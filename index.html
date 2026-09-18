@@ -14,28 +14,51 @@
             overflow-x: hidden;
         }
 
-        /* ★ タイトル画面：全画面レイヤー */
-        #titleScreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at center, #222 0%, #000 60%);
-            color: #fff;
-            z-index: 9999;
+#photoIntro {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('PXL_tiyo.jpg'); /* ← 見せたい写真に変更 */
+    background-size: cover;
+    background-position: center;
+    z-index: 10000; /* タイトル画面より前に出す */
+    opacity: 1;
+    transition: opacity 1.5s ease;
+}
 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+#photoIntro.hide {
+    opacity: 0;
+    pointer-events: none;
+}
+        /* ★ タイトル画面：全画面レイヤー */
+#titleScreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('space_nasa.jpg');  /* ← NASA 写真を使う */
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: #fff;
+    z-index: 9999;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
 
         #titleScreen .title-inner {
             text-align: center;
             padding: 20px 40px;
             border: 1px solid #888;
             border-radius: 8px;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0);
         }
 
         #titleScreen h1 {
@@ -54,22 +77,22 @@
             cursor: pointer;
         }
 
-        /* ★ 幕アニメ（左下 → 右上へ巻き上がる） */
-        #titleScreen.hide {
-            animation: curtainUp 1.8s ease forwards;
-        }
+        /* ★ 幕アニメ（回転） */
 
-        @keyframes curtainUp {
-            0% {
-                transform: translateX(-100%) translateY(100%);
-                opacity: 1;
-            }
-            100% {
-                transform: translateX(100%) translateY(-100%);
-                opacity: 0;
-            }
-        }
+#titleScreen.hide {
+    animation: rotateHide 1.5s ease forwards;
+}
 
+@keyframes rotateHide {
+    0% {
+        transform: rotateY(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: rotateY(90deg);
+        opacity: 0;
+    }
+}
         /* ★ ゲーム画面フェードイン */
         #gameContainer {
             opacity: 0;
@@ -91,7 +114,6 @@
     flex-wrap: nowrap;   /* ★ これを追加する！ */
     margin-left: -10px;   /* ← これで全体を1cm左へ寄せる */
 }
-}
 
         #board {
             border: 1px solid #555;
@@ -104,7 +126,10 @@
             height: 700px;
             display: block;
         }
-
+/* ★ viewer の背景を半透明にして宇宙を透かす */
+#viewer {
+    background: rgba(0,0,0,0.3);
+}
         /* ★ 光沢ボタン（青） */
 
         .videoButton.blue {
@@ -176,6 +201,9 @@
 
 <body>
 
+    <!-- ★ ゲーム開始前の写真レイヤー（2秒だけ表示） -->
+    <div id="photoIntro"></div>
+
     <!-- ★ タイトル画面レイヤー -->
     <div id="titleScreen">
         <div class="title-inner">
@@ -216,7 +244,7 @@
     <button class="videoButton blue" id="modeAIVsAI">AI vs AI</button>
     <button class="videoButton blue" id="aiWeak">弱い（深さ1）</button>
     <button class="videoButton blue" id="aiNormal">普通（深さ2）</button>
-    <button class="videoButton blue" id="aiStrong">強い（深さ3）</button>
+
 
 </div>
 
@@ -250,6 +278,12 @@
     <!-- ★ タイトル画面 → ゲーム開始演出 -->
     <script>
         window.addEventListener("DOMContentLoaded", () => {
+    // ★ 2秒だけ写真を見せる
+    setTimeout(() => {
+        document.getElementById("photoIntro").classList.add("hide");
+    }, 2000);
+
+    // ★ ここから先はあなたの元の処理
             const titleScreen = document.getElementById("titleScreen");
             const startButton = document.getElementById("startButton");
             const gameContainer = document.getElementById("gameContainer");
@@ -270,7 +304,7 @@
                 // 3. ゲーム画面フェードイン
                 setTimeout(() => {
                     gameContainer.classList.add("show");
-                }, 2000);
+                }, 4000);
             });
         });
 
