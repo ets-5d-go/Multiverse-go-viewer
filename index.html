@@ -20,7 +20,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url('PXL_tiyo.jpg'); /* ← 見せたい写真に変更 */
+    background-image: url('PXL_sora.jpg'); /* ← 見せたい写真に変更 */
     background-size: cover;
     background-position: center;
     z-index: 10000; /* タイトル画面より前に出す */
@@ -119,17 +119,23 @@
             border: 1px solid #555;
             margin-top: 40px;
             margin-left: 120px;
+    position: relative;  /* ★ これがないと絶対に動かない */
+    left: 0px;
+    top: 0px;
+    transition: left 0.15s ease, top 0.15s ease;  /* ★ ここに入れる！ */
         }
-
-        #viewer {
-            width: 600px;
-            height: 700px;
-            display: block;
-        }
-/* ★ viewer の背景を半透明にして宇宙を透かす */
 #viewer {
+    width: 600px;
+    height: 700px;
+    display: block;
+
     background: rgba(0,0,0,0.3);
+
+    position: relative;   /* ★ これで三次元盤が動く */
+    left: 0px;            /* ★ 初期位置 */
+    top: 0px;             /* ★ 初期位置 */
 }
+
         /* ★ 光沢ボタン（青） */
 
         .videoButton.blue {
@@ -236,6 +242,7 @@
     <button class="videoButton yellow" onclick="setLayer(3)">4層目</button>
     <button class="videoButton yellow" onclick="setLayer(4)">5層目（最上部）</button>
 
+
     <!-- 青ボタン（横一列） -->
     <button class="videoButton blue" id="demoButton">五次元取りデモ</button>
     <button class="videoButton blue" id="clearBoard">クリヤー</button>
@@ -312,6 +319,32 @@
             initViewer();
             window.viewerReady = true;
         });
+window.addEventListener("load", () => {
+    initViewer();
+    window.viewerReady = true;
+
+    // ★ ここで board を取得してから右クリックイベントを付ける
+    const boardEl = document.getElementById("board");
+
+    boardEl.addEventListener("contextmenu", (e) => {
+        e.preventDefault();  // 右クリックメニューを無効化
+
+        let left = parseInt(boardEl.style.left || 0);
+        let top  = parseInt(boardEl.style.top  || 0);
+
+        // ★ 移動量（あなたの好みで調整可能）
+        left -= 30;   // 左へ 30px
+        top  += 30;   // 下へ 30px
+
+        // ★ 範囲制限（右側・上側・下側に出ないように）
+        if (left < -50) left = -50;     // 左に行きすぎない
+        if (top  > 150) top  = 150;     // 下に行きすぎない
+
+        boardEl.style.left = left + "px";
+        boardEl.style.top  = top  + "px";
+    });
+});
+
 
         /* ★ 動画再生（仮） */
         function playVideo(filename) {

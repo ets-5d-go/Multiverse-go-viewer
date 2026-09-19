@@ -48,8 +48,18 @@ let demoRunning = false;
 // -------------------------------
 // 盤を描く
 // -------------------------------
+
 function drawBoard() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // ★ 左下の一枠だけ薄い黄色で塗る（背景）
+    ctx.fillStyle = "rgba(255, 255, 150, 0.4)";  // 薄い黄色
+    ctx.fillRect(
+        CELL,                      // 左端
+        CELL + (SIZE - 2) * CELL,  // 下端（左下）
+        CELL,
+        CELL
+    );
 
     ctx.strokeStyle = "yellow";
     ctx.lineWidth = 1;
@@ -68,7 +78,6 @@ function drawBoard() {
         ctx.stroke();
     }
 }
-
 // -------------------------------
 // 石を描く
 // -------------------------------
