@@ -114,17 +114,16 @@
     flex-wrap: nowrap;   /* ★ これを追加する！ */
     margin-left: -10px;   /* ← これで全体を1cm左へ寄せる */
 }
+#board {
+    border: 1px solid #555;
 
-        #board {
-            border: 1px solid #555;
-            margin-top: 40px;
-            margin-left: 120px;
-    position: relative;  /* ★ これがないと絶対に動かない */
-    left: 0px;
-    top: 0px;
-    transition: left 0.15s ease, top 0.15s ease;  /* ★ ここに入れる！ */
-        }
-#viewer {
+    position: relative;
+    left: 0px;   /* ← margin-left の代わり */
+    top: 40px;     /* ← margin-top の代わり */
+
+    transition: left 0.15s ease, top 0.15s ease;
+}
+        #viewer {
     width: 600px;
     height: 700px;
     display: block;
@@ -234,19 +233,20 @@
 
 <!-- ★ 層ボタン + 青ボタンを横並びにするコンテナ -->
 <div id="layerButtons" style="margin-bottom: 10px; display:flex; gap:6px;">
+<!-- ★ 人間 vs 人間 を黄色にして左端へ移動 -->
 
+<button class="videoButton yellow redBorder" id="modeHumanVsHuman">人間 vs 人間</button>
     <!-- 黄色ボタン -->
-    <button class="videoButton yellow" onclick="setLayer(0)">1層目（最下部）</button>
+    <button class="videoButton yellow" onclick="setLayer(0)">最下部</button>
     <button class="videoButton yellow" onclick="setLayer(1)">2層目</button>
     <button class="videoButton yellow" onclick="setLayer(2)">3層目</button>
     <button class="videoButton yellow" onclick="setLayer(3)">4層目</button>
-    <button class="videoButton yellow" onclick="setLayer(4)">5層目（最上部）</button>
+    <button class="videoButton yellow" onclick="setLayer(4)">5層目</button>
 
 
     <!-- 青ボタン（横一列） -->
     <button class="videoButton blue" id="demoButton">五次元取りデモ</button>
     <button class="videoButton blue" id="clearBoard">クリヤー</button>
-    <button class="videoButton blue" id="modeHumanVsHuman">人間 vs 人間</button>
     <button class="videoButton blue" id="modeHumanVsAI">人間 vs AI</button>
     <button class="videoButton blue" id="modeAIVsAI">AI vs AI</button>
     <button class="videoButton blue" id="aiWeak">弱い（深さ1）</button>
@@ -266,7 +266,7 @@
                 <h2>多次元囲碁動画</h2>
 
                 <button class="videoButton red" onclick="playVideo('video2d.mp4')">２次元</button>
-                <button class="videoButton red" onclick="playVideo('video3d.mp4')">３次元</button>
+                <button class="videoButton red" onclick="playVideo('3dgo0920_noPEzNN6.mp4')">３次元</button>
                 <button class="videoButton red" onclick="playVideo('video4d.mp4')">４次元</button>
                 <button class="videoButton red" onclick="playVideo('video5d.mp4')">５次元</button>
             </div>
@@ -311,7 +311,7 @@
                 // 3. ゲーム画面フェードイン
                 setTimeout(() => {
                     gameContainer.classList.add("show");
-                }, 4000);
+                }, 3000);
             });
         });
 
@@ -320,31 +320,24 @@
             window.viewerReady = true;
         });
 window.addEventListener("load", () => {
-    initViewer();
-    window.viewerReady = true;
+    initViewer();                 // ★ 三次元盤の初期化（必須）
+    window.viewerReady = true;    // ★ viewer.js が使うフラグ（必須）
 
-    // ★ ここで board を取得してから右クリックイベントを付ける
+    // ★ 二次元盤の右クリックイベント
     const boardEl = document.getElementById("board");
 
     boardEl.addEventListener("contextmenu", (e) => {
-        e.preventDefault();  // 右クリックメニューを無効化
+        e.preventDefault();
 
         let left = parseInt(boardEl.style.left || 0);
-        let top  = parseInt(boardEl.style.top  || 0);
 
-        // ★ 移動量（あなたの好みで調整可能）
-        left -= 30;   // 左へ 30px
-        top  += 30;   // 下へ 30px
+        left -= 10;   // 左へ 10px（小さく・滑らかに）
 
-        // ★ 範囲制限（右側・上側・下側に出ないように）
-        if (left < -50) left = -50;     // 左に行きすぎない
-        if (top  > 150) top  = 150;     // 下に行きすぎない
+        if (left < 50) left = 50;  // 範囲制限
 
         boardEl.style.left = left + "px";
-        boardEl.style.top  = top  + "px";
     });
 });
-
 
         /* ★ 動画再生（仮） */
         function playVideo(filename) {
