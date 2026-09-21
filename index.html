@@ -161,13 +161,45 @@
             border: 2px solid #ff3333;
             box-shadow: 0 0 8px rgba(255,80,80,0.6);
         }
-
-        /* ★ 動画ボタンエリア */
+/* ★ 人間 vs 人間専用オレンジボタン */
+.videoButton.orange {
+    padding: 6px 12px;
+    margin-right: 6px;
+    border-radius: 4px;
+    background: linear-gradient(#ffb347, #ff7f00); /* オレンジのグラデーション */
+    border: 2px solid #ff4500; /* 濃いオレンジ枠 */
+    color: #333;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(255,120,0,0.6);
+}
+/* ★ 層ボタンの下に置く入力盤ラベル（グレー） */
+.inputLabelSmall {
+    color: #cccccc;        /* グレー文字 */
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 6px;       /* ボタンとの距離 */
+    margin-left: 4px;      /* 左端に寄せる */
+}
+/* ★ 動画ボタンエリア */
         #videoPanel {
             width: 200px;
             margin-left: 20px;
+    margin-top: -95px;   /* ★ 2.5cm 上へ移動（マイナス方向） */
         }
-    </style>
+/* ★ 最下部＋入力盤を縦に並べるコンテナ */
+.layerGroup {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+/* ★ 入力盤ラベル（最下部の真下用） */
+.inputLabelSmall {
+    margin-left: 0;
+    margin-top: 4px;
+}
+</style>
 </head>
 
 <body>
@@ -191,30 +223,37 @@
         <h1 style="text-align:center; margin-bottom:20px;">
             5D Go Viewer (Web Edition)
         </h1>
+<!-- ★ 層ボタン＋青ボタン -->
+<div id="layerButtons" style="margin-bottom: 10px; display:flex; gap:6px;">
 
-        <!-- ★ 層ボタン＋青ボタン -->
-        <div id="layerButtons" style="margin-bottom: 10px; display:flex; gap:6px;">
+    <!-- ★ 人間 vs 人間（オレンジ） -->
+    <button class="videoButton orange redBorder" id="modeHumanVsHuman">人間 vs 人間</button>
 
-            <!-- ★ 人間 vs 人間（黄色＋赤枠）左端 -->
-            <button class="videoButton yellow redBorder" id="modeHumanVsHuman">人間 vs 人間</button>
+    <!-- 黄色ボタン（層） -->
 
-            <!-- 黄色ボタン（層） -->
-            <button class="videoButton yellow" onclick="setLayer(0)">最下部</button>
-            <button class="videoButton yellow" onclick="setLayer(1)">2層目</button>
-            <button class="videoButton yellow" onclick="setLayer(2)">3層目</button>
-            <button class="videoButton yellow" onclick="setLayer(3)">4層目</button>
-            <button class="videoButton yellow" onclick="setLayer(4)">5層目</button>
+<div class="layerGroup">
+    <button class="videoButton yellow" onclick="setLayer(0)">最下部</button>
+    <div class="inputLabelSmall">入力盤</div>
+</div>
+    <button class="videoButton yellow" onclick="setLayer(1)">2層目</button>
+    <button class="videoButton yellow" onclick="setLayer(2)">3層目</button>
+    <button class="videoButton yellow" onclick="setLayer(3)">4層目</button>
+    <button class="videoButton yellow" onclick="setLayer(4)">5層目</button>
 
-            <!-- 青ボタン -->
-            <button class="videoButton blue" id="demoButton">五次元取りデモ</button>
-            <button class="videoButton blue" id="clearBoard">クリヤー</button>
-            <button class="videoButton blue" id="modeHumanVsAI">人間 vs AI</button>
-            <button class="videoButton blue" id="modeAIVsAI">AI vs AI</button>
-            <button class="videoButton blue" id="aiWeak">弱い（深さ1）</button>
-            <button class="videoButton blue" id="aiNormal">普通（深さ2）</button>
-        </div>
+    <!-- 青ボタン -->
+    <button class="videoButton blue" id="clearBoard">停止/クリア</button>
+    <button class="videoButton blue" id="demoButton">三次元囲碁デモ</button>
+    <button class="videoButton blue" id="modeHumanVsAI">人間 vs AI</button>
+    <button class="videoButton blue" id="modeAIVsAI">AI vs AI</button>
+    <button class="videoButton blue" id="aiWeak">普通AI</button>
+    <button class="videoButton blue" id="aiNormal">強いAI</button>
+</div>
 
-        <div id="container">
+
+
+<!-- ★ container はこの下から始まる -->
+<div id="container">
+
             <canvas id="board" width="300" height="300"></canvas>
             <canvas id="viewer"></canvas>
 
@@ -223,8 +262,8 @@
 
                 <button class="videoButton red" onclick="playVideo('video2d.mp4')">２次元</button>
                 <button class="videoButton red" onclick="playVideo('3dgo0920_noPEzNN6.mp4')">３次元</button>
-                <button class="videoButton red" onclick="playVideo('video4d.mp4')">４次元</button>
-                <button class="videoButton red" onclick="playVideo('video5d.mp4')">５次元</button>
+                <button class="videoButton red" onclick="playVideo('4dgo0921.mp4')">４次元</button>
+                <button class="videoButton red" onclick="playVideo('5dgo0921.mp4')">５次元</button>
             <!-- ★ ここに追加 -->
                 <button class="videoButton red" onclick="stopVideo()">動画停止</button>
                 <video id="goVideo" width="300" controls style="margin-top:10px; display:none;"></video>
