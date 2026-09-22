@@ -217,12 +217,7 @@ if (layer === 0 && i === 0) {
     controls.panSpeed      = 0.5;
     controls.screenSpacePanning = true;
 
-    // アニメーション
-    function animate() {
-        controls.update();
-        renderer.render(window.scene, camera);
-        requestAnimationFrame(animate);
-    }
+
 
     // 3D グリッドを再生成（層色の更新用）
     function rebuildGrid() {
@@ -242,10 +237,38 @@ if (layer === 0 && i === 0) {
     }
     window.rebuildGrid = rebuildGrid;
 
-    // アニメーション開始
-    animate();
+
+// ★★★ ゲーム開始時の立体盤演出（回転だけ） ★★★
+let introAnimation = true;
+let frame = 0;
+
+function animate() {
+
+    console.log("introAnimation:", introAnimation, "frame:", frame);
+
+    if (introAnimation) {
+        frame++;
+
+        // ★ 盤そのものを回す（これが本当に見える回転）
+        window.scene.rotation.y += 0.05;
+
+        if (frame > 240) {
+            introAnimation = false;
+        }
+
+    } else {
+        controls.update();
+    }
+
+    renderer.render(window.scene, camera);
+    requestAnimationFrame(animate);
 }
 
-// ★ グローバルに公開して即起動
+// ★ initViewer の中で描画ループを開始
+animate();
+
+}   // ← ★ initViewer の終わり（ここが正しい位置）
+
+// ★ initViewer を公開して起動
 window.initViewer = initViewer;
 initViewer();

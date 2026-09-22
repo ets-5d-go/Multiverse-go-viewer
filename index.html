@@ -34,24 +34,36 @@
         }
 
         /* ★ タイトル画面 */
-        #titleScreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('space_nasa.jpg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            color: #fff;
-            z-index: 9999;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
 
-        #titleScreen.hide {
+#titleScreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('space_nasa.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: #fff;
+    z-index: 9999;
+
+    /* ★ 横並びを解除する */
+    display: block;
+
+    /* ★ 中央寄せはこれだけでOK */
+    text-align: center;
+}
+
+/* ★ タイトル内の要素を縦に積み重ねる */
+#titleScreen div {
+    display: block;
+}
+#clearBoard {
+    color: red;
+    font-weight: bold;
+}
+#titleScreen.hide {
             animation: rotateHide 1.5s ease forwards;
         }
 
@@ -202,28 +214,45 @@
 </style>
 </head>
 
+
 <body>
 
-    <div id="photoIntro"></div>
+<div id="photoIntro"></div>
 
-    <div id="titleScreen">
-        <div class="title-inner">
-            <h1>多次元囲碁世界（仮称）</h1>
-            <p>
-                ・層ボタンで上下の世界を切り替えます。<br>
-                ・盤をクリックして石を置きます。<br>
-                ・モードボタンで対戦形式を選べます。
-            </p>
-            <button id="startButton">ゲーム開始</button>
-        </div>
+<!-- ★ タイトル画面（ここがひとつのブロック） -->
+<div id="titleScreen" style="text-align:center; margin-top:20px;">
+
+    <!-- 赤い巨大飾り文字 -->
+    <div style="font-size:80px; font-weight:bold; color:red;">
+        越
     </div>
 
-    <div id="gameContainer">
+    <!-- メインタイトル -->
+    <div style="font-size:32px; font-weight:bold; color:yellow; margin-top:10px;">
+        超越多次元囲碁世界へようこそ
+    </div>
 
-        <h1 style="text-align:center; margin-bottom:20px;">
-            5D Go Viewer (Web Edition)
-        </h1>
-<!-- ★ 層ボタン＋青ボタン -->
+    <!-- 説明文 -->
+    <div style="font-size:20px; color:white; margin-top:10px;">
+        三次元囲碁を楽しんで、多次元囲碁を鑑賞していってね
+    </div>
+
+    <!-- ゲーム開始ボタン -->
+    <div style="margin-top:20px;">
+        <button id="startButton">ゲーム開始</button>
+    </div>
+
+</div>  <!-- ★ titleScreen の終わり（ここが重要） -->
+
+
+<!-- ★ ゲーム本体コンテナ（タイトルの外側） -->
+<div id="gameContainer">
+
+    <h1 style="text-align:center; margin-bottom:20px;">
+        5D Go Viewer (Web Edition)
+    </h1>
+    <!-- ここから先はあなたの既存のゲームUIが続く -->
+    <!-- ★ 層ボタン＋青ボタン -->
 <div id="layerButtons" style="margin-bottom: 10px; display:flex; gap:6px;">
 
     <!-- ★ 人間 vs 人間（オレンジ） -->
@@ -241,12 +270,12 @@
     <button class="videoButton yellow" onclick="setLayer(4)">5層目</button>
 
     <!-- 青ボタン -->
-    <button class="videoButton blue" id="clearBoard">停止/クリア</button>
+    <button class="videoButton orange" id="modeHumanVsAI">人間 vs AI</button>
     <button class="videoButton blue" id="demoButton">三次元囲碁デモ</button>
-    <button class="videoButton blue" id="modeHumanVsAI">人間 vs AI</button>
     <button class="videoButton blue" id="modeAIVsAI">AI vs AI</button>
-    <button class="videoButton blue" id="aiWeak">普通AI</button>
-    <button class="videoButton blue" id="aiNormal">強いAI</button>
+    <button class="videoButton blue" id="aiWeak">AI普通</button>
+    <button class="videoButton blue" id="aiNormal">AI強い</button>
+    <button class="videoButton blue" id="clearBoard">停止/クリア</button>
 </div>
 
 
@@ -334,4 +363,5 @@ function stopVideo() {
     </script>
 
 </body>
+
 </html>
