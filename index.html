@@ -229,17 +229,18 @@
 
     <!-- メインタイトル -->
     <div style="font-size:32px; font-weight:bold; color:yellow; margin-top:10px;">
-        超越多次元囲碁世界へようこそ
+        時空を越えて多次元囲碁世界へようこそ
     </div>
 
     <!-- 説明文 -->
     <div style="font-size:20px; color:white; margin-top:10px;">
-        三次元囲碁を楽しんで、多次元囲碁を鑑賞していってね
+        三次元囲碁ゲームを楽しんで、多次元囲碁を鑑賞していってね
     </div>
 
     <!-- ゲーム開始ボタン -->
     <div style="margin-top:20px;">
-        <button id="startButton">ゲーム開始</button>
+
+<button id="startButton" class="videoButton blue">ゲーム開始</button>
     </div>
 
 </div>  <!-- ★ titleScreen の終わり（ここが重要） -->
@@ -276,6 +277,8 @@
     <button class="videoButton blue" id="aiWeak">AI普通</button>
     <button class="videoButton blue" id="aiNormal">AI強い</button>
     <button class="videoButton blue" id="clearBoard">停止/クリア</button>
+<!-- ★ 引き分け表示（ここに追加する） -->
+<span id="drawMessage" style="color:red; font-weight:bold; margin-left:10px;"></span>
 </div>
 
 

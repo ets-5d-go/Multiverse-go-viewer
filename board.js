@@ -18,6 +18,8 @@ const CELL = 40;
 const LAYERS_SAFE = (typeof LAYERS === "number") ? LAYERS : 5;
 // ★ LAYERS を再宣言しない（絶対に const LAYERS を書かない）
 
+// ★ パスカウンタ（AI vs AI の終局判定用）
+let passCount = 0;
 // ★ AI / デモ用タイマーID（クリアで止めるため）
 window.aiTimer = null;
 window.demoTimer = null;
@@ -824,12 +826,22 @@ function getLegalMovesOnCurrentLayer(color) {
 function aiPlay() {
     // 1. 白AIの合法手を全部取得
     let moves = getLegalMoves("white");
-    if (moves.length === 0) {
-        console.log("白AIは打てる手がありません（パス）");
-        currentColor = "black";
+
+if (moves.length === 0) {
+    console.log("白AIは打てる手がありません（パス）");
+    currentColor = "black";
+    passCount++;
+
+    if (passCount >= 2) {
+        document.getElementById("drawMessage").textContent = "引き分け";
         return;
     }
 
+    if (gameMode === "ai_vs_ai") {
+        window.aiTimer = setTimeout(() => aiPlayBlack(), 250);
+    }
+    return;
+}
     // 2. ミニマックスで最善手を探す
     let bestMove = null;
     let bestScore = -Infinity;
@@ -865,19 +877,29 @@ function aiPlay() {
     currentColor = "black";
 
     if (gameMode === "ai_vs_ai") {
-        window.aiTimer = setTimeout(() => aiPlayBlack(), 500);
+        window.aiTimer = setTimeout(() => aiPlayBlack(), 100);
     }
 }
 
 function aiPlayBlack() {
 
     let moves = getLegalMoves("black");
-    if (moves.length === 0) {
-        console.log("黒AIは打てる手がありません（パス）");
-        currentColor = "white";
+
+if (moves.length === 0) {
+    console.log("黒AIは打てる手がありません（パス）");
+    currentColor = "white";
+    passCount++;
+
+    if (passCount >= 2) {
+        document.getElementById("drawMessage").textContent = "引き分け";
         return;
     }
 
+    if (gameMode === "ai_vs_ai") {
+        window.aiTimer = setTimeout(() => aiPlay(), 100);
+    }
+    return;
+}
     let bestMove = null;
     let bestScore = Infinity;
 
@@ -908,7 +930,7 @@ function aiPlayBlack() {
     currentColor = "white";
 
     if (gameMode === "ai_vs_ai") {
-        window.aiTimer = setTimeout(() => aiPlay(), 500);
+        window.aiTimer = setTimeout(() => aiPlay(), 100);
     }
 }
 
@@ -941,34 +963,40 @@ document.getElementById("modeHumanVsHuman").addEventListener("click", () => {
     // ★ デモフラグ停止
     demoRunning = false;
 });
-// ★ モード切り替えボタン（人間 vs AI）
-document.getElementById("modeHumanVsAI").addEventListener("click", () => {
-    gameMode = "human_vs_ai";
-    console.log("モード：人間 vs AI");
-});
 
+// ===============================
 // ★ モード切り替えボタン（AI vs AI）
+// ===============================
 document.getElementById("modeAIVsAI").addEventListener("click", () => {
+
     gameMode = "ai_vs_ai";
     console.log("モード：AI vs AI");
 
     // ★ 層を必ず 0 に戻す
     window.currentLayerIndex = 0;
-    drawBoard();
-    drawAllStones();
 
     // ★ 手番を黒にセット
     currentColor = "black";
 
-    // ★ 既存AIタイマーを止めてから開始
+    // ★ 既存AIタイマーを停止（重要）
     if (window.aiTimer !== null) {
         clearTimeout(window.aiTimer);
         window.aiTimer = null;
     }
 
-    window.aiTimer = setTimeout(() => aiPlayBlack(), 300);
-});
+    // ★ 盤面を完全初期化
+    clearAllBoards();
 
+    // ★ ランダム初手（黒→白→黒）
+    randomOpeningMoves();
+
+    // ★ 表示更新
+    drawBoard();
+    drawAllStones();
+
+    // ★ 黒AIから開始（高速化：250ms）
+    window.aiTimer = setTimeout(() => aiPlayBlack(), 250);
+});
 // ★ AI強さボタン
 document.getElementById("aiWeak").addEventListener("click", () => {
     aiDepth = 1;
@@ -1035,12 +1063,42 @@ function clearAllBoards() {
     // ★ 手番を黒に戻す
     currentColor = "black";
 
-    // ★ AI対AIを強制終了
-    gameMode = "human_vs_ai";
-
+   
+// ★ AI対AIを強制終了
+// gameMode = "human_vs_ai";  ← コメントアウト or 削除
     console.log("盤を初期化しました");
+// ★ 引き分け表示を消す（ここが正しい位置）
+    document.getElementById("drawMessage").textContent = "";
+
+    // ★ パスカウンタをリセット
+    passCount = 0;
 }
+
+
+// ① loadイベントの登録
 window.addEventListener("load", () => {
     document.getElementById("clearBoard").addEventListener("click", clearAllBoards);
-});
+}); // ★ ここで「load の処理」は終わり
+
+// ② stoneObjects の初期化
 window.stoneObjects = {};
+
+
+// ③ ランダム初手関数（loadとは関係ない“普通の関数定義”）
+function randomOpeningMoves() {
+    for (let i = 0; i < 3; i++) {
+        let x = Math.floor(Math.random() * SIZE);
+        let y = Math.floor(Math.random() * SIZE);
+
+        // 黒 → 白 → 黒 と交互に置く
+        let color = (i % 2 === 0) ? "black" : "white";
+
+        board[window.currentLayerIndex][y][x] = color;
+        addStone3D(x, y, color, window.currentLayerIndex);
+        removeCapturedStones(x, y, window.currentLayerIndex, color);
+    }
+
+    // ランダム初手後に描画
+    drawBoard();
+    drawAllStones();
+}
