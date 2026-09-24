@@ -308,62 +308,78 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
-    <script src="viewer.js"></script>
     <script src="board.js"></script>
+    <script src="viewer.js"></script>
+<script>
+window.addEventListener("DOMContentLoaded", () => {
 
-    <script>
-        window.addEventListener("DOMContentLoaded", () => {
+    // ★ 写真レイヤーをフェードアウト
+    setTimeout(() => {
+        document.getElementById("photoIntro").classList.add("hide");
+    }, 2000);
 
-            setTimeout(() => {
-                document.getElementById("photoIntro").classList.add("hide");
-            }, 2000);
+    const titleScreen   = document.getElementById("titleScreen");
+    const startButton   = document.getElementById("startButton");
+    const gameContainer = document.getElementById("gameContainer");
 
-            const titleScreen = document.getElementById("titleScreen");
-            const startButton = document.getElementById("startButton");
-            const gameContainer = document.getElementById("gameContainer");
+    startButton.addEventListener("click", () => {
 
-            startButton.addEventListener("click", () => {
-                titleScreen.classList.add("hide");
+        // ★ タイトル画面を回転フェードアウト
+        titleScreen.classList.add("hide");
 
-                setTimeout(() => {
-                    document.body.style.backgroundImage = "url('space_nasa.jpg')";
-                    document.body.style.backgroundSize = "cover";
-                    document.body.style.backgroundPosition = "center";
-                    document.body.style.backgroundAttachment = "fixed";
-                }, 1800);
+        // ★ 背景切り替え（1.8秒後）
+        setTimeout(() => {
+            document.body.style.backgroundImage = "url('space_nasa.jpg')";
+            document.body.style.backgroundSize = "cover";
+            document.body.style.backgroundPosition = "center";
+            document.body.style.backgroundAttachment = "fixed";
+        }, 1800);
 
-                setTimeout(() => {
-                    gameContainer.classList.add("show");
-                }, 3000);
-            });
-        });
+        // ★ ゲーム画面フェードイン（3秒後）
+        setTimeout(() => {
+            gameContainer.classList.add("show");
+        }, 3000);
 
-        window.addEventListener("load", () => {
-            initViewer();
+        // ★★★ Three.js のウェルカム演出はフェードイン後に開始
+        setTimeout(() => {
+            initViewer();          // ← viewer.js の演出が確実に見える
             window.viewerReady = true;
+        }, 3000);
+    });
+});
 
-            const boardEl = document.getElementById("board");
-            boardEl.addEventListener("contextmenu", (e) => {
-                e.preventDefault();
-                let left = parseInt(boardEl.style.left || 0);
-                left -= 10;
-                if (left < 50) left = 50;
-                boardEl.style.left = left + "px";
-            });
-        });
+
+// ★ board.js の初期化は load 時でOK（viewer 初期化とは分離）
+window.addEventListener("load", () => {
+
+    const boardEl = document.getElementById("board");
+
+    boardEl.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        let left = parseInt(boardEl.style.left || 0);
+        left -= 10;
+        if (left < 50) left = 50;
+        boardEl.style.left = left + "px";
+    });
+});
+
+
+// ★ 動画再生ロジック（そのまま残す）
 function playVideo(filename) {
     const video = document.getElementById("goVideo");
-    video.style.display = "block";   // ★ 動画を表示
-    video.src = filename;            // ★ ファイルをセット
-    video.play();                    // ★ 再生開始
+    video.style.display = "block";
+    video.src = filename;
+    video.play();
 }
+
 function stopVideo() {
     const video = document.getElementById("goVideo");
-    video.pause();              // ★ 再生停止
-    video.currentTime = 0;      // ★ 頭に戻す
-    video.style.display = "none";  // ★ 画面から消す
+    video.pause();
+    video.currentTime = 0;
+    video.style.display = "none";
 }
-    </script>
+</script>
+
 
 </body>
 

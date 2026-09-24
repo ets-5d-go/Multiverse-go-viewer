@@ -15,7 +15,8 @@ window.stoneObjects = {};
 // ★ Three.js のシーンを先に作って公開する
 window.scene = new THREE.Scene();
 window.scene.background = null;   // 背景を透明にする
-
+// ★ ウェルカム演出中フラグ（rebuildGrid を止める）
+window.viewerAnimating = true;
 // ===============================
 // 層ボタンで層を変更する（グローバル）
 // ===============================
@@ -217,103 +218,67 @@ if (layer === 0 && i === 0) {
     controls.panSpeed      = 0.5;
     controls.screenSpacePanning = true;
 
-
-
     // 3D グリッドを再生成（層色の更新用）
     function rebuildGrid() {
-
-        // 既存のグリッド線(Line)を全部削除
         for (let i = window.scene.children.length - 1; i >= 0; i--) {
             const obj = window.scene.children[i];
             if (obj.type === "Line") {
                 window.scene.remove(obj);
             }
         }
-
-        // 新しいグリッドを層ごとに生成
         for (let layer = 0; layer < LAYERS; layer++) {
             createBoardGrid(layer);
         }
     }
     window.rebuildGrid = rebuildGrid;
+// ★★★ ゲーム開始時の立体盤演出（縮小 → 拡大 → 回転 → 安定） ★★★
+    let welcomeFrame = 0;
 
+    function animate() {
+        // 最初の約3秒だけウェルカム演出
+if (welcomeFrame < 180) {
+    welcomeFrame++;
+    const t    = welcomeFrame / 180;
+    const ease = (1 - Math.cos(Math.PI * t)) / 2;
 
-// ★★★ ゲーム開始時の立体盤演出（回転だけ） ★★★
-let introAnimation = true;
-let frame = 0;
+    const s = 0.1 + ease * 0.9;
+    window.scene.scale.set(s, s, s);
 
-function animate() {
+    // 左右に一回転（Y軸）
+    window.scene.rotation.y = ease * (Math.PI * 2);
+}
+else if (welcomeFrame === 180) {
 
-    console.log("introAnimation:", introAnimation, "frame:", frame);
+    // ★ 初期状態の向きに戻す（昨日と同じ）
+    window.scene.rotation.x = 0;
+    window.scene.rotation.y = 0;
 
-    if (introAnimation) {
-        frame++;
+    camera.lookAt(0, BOARD_Y, 0);
 
-        // ★ 盤そのものを回す（これが本当に見える回転）
-        window.scene.rotation.y += 0.05;
+    // 慣性が気になるならここで止めてもいい
+    controls.enableDamping = false;
+    controls.update();
 
-        if (frame > 240) {
-            introAnimation = false;
-        }
+    // 演出終了フラグ（使うなら）
+    window.viewerAnimating = false;
 
-    } else {
-        controls.update();
-    }
-
-    renderer.render(window.scene, camera);
-    requestAnimationFrame(animate);
+    // グリッドを一度再生成
+    window.rebuildGrid();
 }
 
 
 
-// ★★★ ゲーム開始時の立体盤演出（縮小 → 拡大 → 回転 → 安定） ★★★
-let welcomeAnimationDone = false;
-let welcomeFrame = 0;
 
-function runWelcomeAnimation() {
-    if (welcomeAnimationDone) return;
-    welcomeAnimationDone = true;
-
-    // ★ 最初は小さく
-    window.scene.scale.set(0.1, 0.1, 0.1);
-
-    function animateWelcome() {
-        welcomeFrame++;
-
-        const t = welcomeFrame / 180;  // 約3秒
-        const ease = t < 1 ? (1 - Math.cos(Math.PI * t)) / 2 : 1;
-
-        const s = 0.1 + ease * 0.9;   // 0.1 → 1.0
-        window.scene.scale.set(s, s, s);
-
-        window.scene.rotation.y = ease * 0.8;
-
+        // ふつうのカメラ操作＋描画
+        controls.update();
         renderer.render(window.scene, camera);
 
-        if (t < 1) {
-            requestAnimationFrame(animateWelcome);
-        }
+        requestAnimationFrame(animate);
     }
 
-    animateWelcome();
-}
-
-function animate() {
-    // 最初の1回だけウェルカム演出
-    if (!welcomeAnimationDone) {
-        runWelcomeAnimation();
-    }
-
-    if (welcomeAnimationDone) {
-        controls.update();
-    }
-
-    renderer.render(window.scene, camera);
-    requestAnimationFrame(animate);
-}
-
-// ★ 描画ループ開始
-animate();
+    // 描画ループ開始
+    animate();
 } // ← initViewer の終わり
-// ★ initViewer を公開して起動
+
+// initViewer を公開
 window.initViewer = initViewer;

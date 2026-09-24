@@ -997,6 +997,41 @@ document.getElementById("modeAIVsAI").addEventListener("click", () => {
     // ★ 黒AIから開始（高速化：250ms）
     window.aiTimer = setTimeout(() => aiPlayBlack(), 250);
 });
+// ===============================
+// ★ モード切り替えボタン（人間 vs AI）
+// ===============================
+document.getElementById("modeHumanVsAI").addEventListener("click", () => {
+
+    console.log("モード：人間 vs AI");
+    gameMode = "human_vs_ai";
+
+    // ★ AIタイマー停止（最重要）
+    if (window.aiTimer !== null) {
+        clearTimeout(window.aiTimer);
+        window.aiTimer = null;
+    }
+
+    // ★ デモタイマー停止
+    if (window.demoTimer !== null) {
+        clearTimeout(window.demoTimer);
+        window.demoTimer = null;
+    }
+
+    // ★ デモフラグ停止
+    demoRunning = false;
+
+    // ★ 盤面を完全初期化
+    clearAllBoards();
+
+    // ★ 手番を黒に戻す
+    currentColor = "black";
+
+    // ★ 表示更新
+    drawBoard();
+    drawAllStones();
+
+    // ★ 人間が黒 → 白AIが返す準備（クリック時にAIが返す）
+});
 // ★ AI強さボタン
 document.getElementById("aiWeak").addEventListener("click", () => {
     aiDepth = 1;
