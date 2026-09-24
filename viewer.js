@@ -264,11 +264,56 @@ function animate() {
     requestAnimationFrame(animate);
 }
 
-// ★ initViewer の中で描画ループを開始
+
+
+// ★★★ ゲーム開始時の立体盤演出（縮小 → 拡大 → 回転 → 安定） ★★★
+let welcomeAnimationDone = false;
+let welcomeFrame = 0;
+
+function runWelcomeAnimation() {
+    if (welcomeAnimationDone) return;
+    welcomeAnimationDone = true;
+
+    // ★ 最初は小さく
+    window.scene.scale.set(0.1, 0.1, 0.1);
+
+    function animateWelcome() {
+        welcomeFrame++;
+
+        const t = welcomeFrame / 180;  // 約3秒
+        const ease = t < 1 ? (1 - Math.cos(Math.PI * t)) / 2 : 1;
+
+        const s = 0.1 + ease * 0.9;   // 0.1 → 1.0
+        window.scene.scale.set(s, s, s);
+
+        window.scene.rotation.y = ease * 0.8;
+
+        renderer.render(window.scene, camera);
+
+        if (t < 1) {
+            requestAnimationFrame(animateWelcome);
+        }
+    }
+
+    animateWelcome();
+}
+
+function animate() {
+    // 最初の1回だけウェルカム演出
+    if (!welcomeAnimationDone) {
+        runWelcomeAnimation();
+    }
+
+    if (welcomeAnimationDone) {
+        controls.update();
+    }
+
+    renderer.render(window.scene, camera);
+    requestAnimationFrame(animate);
+}
+
+// ★ 描画ループ開始
 animate();
-
-}   // ← ★ initViewer の終わり（ここが正しい位置）
-
+} // ← initViewer の終わり
 // ★ initViewer を公開して起動
 window.initViewer = initViewer;
-initViewer();
