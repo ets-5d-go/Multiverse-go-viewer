@@ -5,33 +5,34 @@
     <title>多次元囲碁世界（仮称）</title>
 
     <style>
-        body {
-            background: #000;
-            color: white;
-            font-family: sans-serif;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }
+body {
+    background-image: url('PXL_sora.jpg');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
 
         /* ★ ゲーム開始前の写真レイヤー */
-        #photoIntro {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('PXL_sora.jpg');
-            background-size: cover;
-            background-position: center;
-            z-index: 10000;
-            opacity: 1;
-            transition: opacity 1.5s ease;
-        }
-        #photoIntro.hide {
-            opacity: 0;
-            pointer-events: none;
-        }
+#photoIntro {
+    display: none;   /* ← 最初は非表示にする */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('PXL_sora.jpg');
+    background-size: cover;
+    background-position: center;
+    z-index: 10000;
+}
+
+
+
 
         /* ★ タイトル画面 */
 
@@ -48,13 +49,15 @@
     color: #fff;
     z-index: 9999;
 
-    /* ★ 横並びを解除する */
-    display: block;
+
 
     /* ★ 中央寄せはこれだけでOK */
     text-align: center;
 }
-
+/* ★ 最初は完全非表示（これが正しい） */
+#titleScreen {
+    display: none;
+}
 /* ★ タイトル内の要素を縦に積み重ねる */
 #titleScreen div {
     display: block;
@@ -313,36 +316,40 @@
 <script>
 window.addEventListener("DOMContentLoaded", () => {
 
-    // ★ 写真レイヤーをフェードアウト
-    setTimeout(() => {
-        document.getElementById("photoIntro").classList.add("hide");
-    }, 2000);
-
-    const titleScreen   = document.getElementById("titleScreen");
-    const startButton   = document.getElementById("startButton");
+    const intro = document.getElementById("photoIntro");
+    const titleScreen = document.getElementById("titleScreen");
+    const startButton = document.getElementById("startButton");
     const gameContainer = document.getElementById("gameContainer");
 
+    // ★ 最初に雲写真を表示する
+    intro.style.display = "block";
+
+    // ★ タイトル画面を写真の下に表示
+    titleScreen.style.display = "block";
+
+    // ★ 2秒後に雲写真を消す
+    setTimeout(() => {
+        intro.style.display = "none";
+    }, 2000);
+
+    // ★ 開始ボタン
     startButton.addEventListener("click", () => {
 
-        // ★ タイトル画面を回転フェードアウト
+        // ★ 雲写真を完全に消す（念のため）
+        intro.style.display = "none";
+
         titleScreen.classList.add("hide");
 
-        // ★ 背景切り替え（1.8秒後）
         setTimeout(() => {
             document.body.style.backgroundImage = "url('space_nasa.jpg')";
-            document.body.style.backgroundSize = "cover";
-            document.body.style.backgroundPosition = "center";
-            document.body.style.backgroundAttachment = "fixed";
         }, 1800);
 
-        // ★ ゲーム画面フェードイン（3秒後）
         setTimeout(() => {
             gameContainer.classList.add("show");
         }, 3000);
 
-        // ★★★ Three.js のウェルカム演出はフェードイン後に開始
         setTimeout(() => {
-            initViewer();          // ← viewer.js の演出が確実に見える
+            initViewer();
             window.viewerReady = true;
         }, 3000);
     });
