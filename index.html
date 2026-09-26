@@ -222,6 +222,7 @@ body {
 
 <div id="photoIntro"></div>
 
+
 <!-- ★ タイトル画面（ここがひとつのブロック） -->
 <div id="titleScreen" style="text-align:center; margin-top:20px;">
 
@@ -242,70 +243,80 @@ body {
 
     <!-- ゲーム開始ボタン -->
     <div style="margin-top:20px;">
-
-<button id="startButton" class="videoButton blue">ゲーム開始</button>
+        <button id="startButton" class="videoButton blue">ゲーム開始</button>
     </div>
 
-</div>  <!-- ★ titleScreen の終わり（ここが重要） -->
+    <!-- ★ マニュアルページボタン -->
+    <div style="margin-top:10px;">
+        <button class="videoButton blue" onclick="location.href='manual.html'">
+            マニュアルページ
+        </button>
+    </div>
+
+</div>   <!-- ★★★ ここで titleScreen を閉じる！！ -->
 
 
 <!-- ★ ゲーム本体コンテナ（タイトルの外側） -->
 <div id="gameContainer">
-
     <h1 style="text-align:center; margin-bottom:20px;">
         5D Go Viewer (Web Edition)
     </h1>
     <!-- ここから先はあなたの既存のゲームUIが続く -->
     <!-- ★ 層ボタン＋青ボタン -->
+
 <div id="layerButtons" style="margin-bottom: 10px; display:flex; gap:6px;">
 
-    <!-- ★ 人間 vs 人間（オレンジ） -->
     <button class="videoButton orange redBorder" id="modeHumanVsHuman">人間 vs 人間</button>
 
-    <!-- 黄色ボタン（層） -->
+    <div class="layerGroup">
+        <button class="videoButton yellow" onclick="setLayer(0)">最下部</button>
+        <div class="inputLabelSmall">入力盤</div>
+    </div>
 
-<div class="layerGroup">
-    <button class="videoButton yellow" onclick="setLayer(0)">最下部</button>
-    <div class="inputLabelSmall">入力盤</div>
-</div>
     <button class="videoButton yellow" onclick="setLayer(1)">2層目</button>
     <button class="videoButton yellow" onclick="setLayer(2)">3層目</button>
     <button class="videoButton yellow" onclick="setLayer(3)">4層目</button>
     <button class="videoButton yellow" onclick="setLayer(4)">5層目</button>
 
-    <!-- 青ボタン -->
     <button class="videoButton orange" id="modeHumanVsAI">人間 vs AI</button>
     <button class="videoButton blue" id="demoButton">三次元囲碁デモ</button>
     <button class="videoButton blue" id="modeAIVsAI">AI vs AI</button>
+
     <button class="videoButton blue" id="aiWeak">AI普通</button>
-    <button class="videoButton blue" id="aiNormal">AI強い</button>
+
+    <button class="videoButton blue returnButton"
+            id="aiNormal"
+            onclick="location.href='index.html'"
+            style="color:red;">
+        戻る
+    </button>
+
     <button class="videoButton blue" id="clearBoard">停止/クリア</button>
-<!-- ★ 引き分け表示（ここに追加する） -->
-<span id="drawMessage" style="color:red; font-weight:bold; margin-left:10px;"></span>
+
+    <span id="drawMessage" style="color:red; font-weight:bold; margin-left:10px;"></span>
+
+    <button class="videoButton blue" onclick="location.href='manual.html'">マニュアル</button>
+
 </div>
 
-
-
-<!-- ★ container はこの下から始まる -->
 <div id="container">
 
-            <canvas id="board" width="300" height="300"></canvas>
-            <canvas id="viewer"></canvas>
+    <canvas id="board" width="300" height="300"></canvas>
+    <canvas id="viewer"></canvas>
 
-            <div id="videoPanel">
-                <h2>多次元囲碁動画</h2>
+    <div id="videoPanel">
+        <h2>多次元囲碁動画</h2>
 
-                <button class="videoButton red" onclick="playVideo('2dgo0922.mp4')">２次元</button>
-                <button class="videoButton red" onclick="playVideo('3dgo0920_noPEzNN6.mp4')">３次元</button>
-                <button class="videoButton red" onclick="playVideo('4dgo0921.mp4')">４次元</button>
-                <button class="videoButton red" onclick="playVideo('5dgo0921.mp4')">５次元</button>
-            <!-- ★ ここに追加 -->
-                <button class="videoButton red" onclick="stopVideo()">動画停止</button>
-                <video id="goVideo" width="300" controls style="margin-top:10px; display:none;"></video>
-            </div>
-        </div>
+        <button class="videoButton red" onclick="playVideo('2dgo0922.mp4')">２次元</button>
+        <button class="videoButton red" onclick="playVideo('3dgo0920_noPEzNN6.mp4')">３次元</button>
+        <button class="videoButton red" onclick="playVideo('4dgo0921.mp4')">４次元</button>
+        <button class="videoButton red" onclick="playVideo('5dgo0921.mp4')">５次元</button>
+        <button class="videoButton red" onclick="stopVideo()">動画停止</button>
 
+        <video id="goVideo" width="300" controls style="margin-top:10px; display:none;"></video>
     </div>
+
+</div> <!-- container を閉じる -->
 
     <!-- Three.js -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
@@ -324,12 +335,13 @@ window.addEventListener("DOMContentLoaded", () => {
     // ★ 最初に雲写真を表示する
     intro.style.display = "block";
 
-    // ★ タイトル画面を写真の下に表示
-    titleScreen.style.display = "block";
+
 
     // ★ 2秒後に雲写真を消す
     setTimeout(() => {
         intro.style.display = "none";
+    // ★ タイトル画面を写真の下に表示
+    titleScreen.style.display = "block";
     }, 2000);
 
     // ★ 開始ボタン
@@ -342,7 +354,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
         setTimeout(() => {
             document.body.style.backgroundImage = "url('space_nasa.jpg')";
-        }, 1800);
+        }, 3000);
 
         setTimeout(() => {
             gameContainer.classList.add("show");
