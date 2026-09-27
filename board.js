@@ -263,6 +263,11 @@ function removeCapturedStones(x, y, z, color) {
                     for (let [gx, gy, gz] of group) {
                         board[gz][gy][gx] = null;
                         removeStone3D(gx, gy, gz);
+                        // ★ 白石が取られたらカウント（黒が取った場合）
+                        if (enemy === "white") {
+                            whiteCapturedCount++;
+                            updateWhiteCapturedDisplay();
+                        }
                     }
                 }
             }
