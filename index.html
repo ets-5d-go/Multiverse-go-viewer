@@ -314,7 +314,24 @@ body {
 <script src="viewer.js"></script>
 
 <script>
+
+
 window.addEventListener("DOMContentLoaded", () => {
+
+    // ★ manual.html から戻ってきたらタイトル画面をスキップ
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("from") === "manual") {
+
+        // ★ 背景を宇宙にする（これが重要）
+        document.body.style.backgroundImage = "url('space_nasa.jpg')";
+
+        document.getElementById("titleScreen").style.display = "none";
+        document.getElementById("gameContainer").classList.add("show");
+        initViewer();
+        window.viewerReady = true;
+
+        return;   // ★ タイトル画面の処理を完全にスキップ
+    }
 
     const intro = document.getElementById("photoIntro");
     const titleScreen = document.getElementById("titleScreen");
@@ -322,7 +339,6 @@ window.addEventListener("DOMContentLoaded", () => {
     const gameContainer = document.getElementById("gameContainer");
 
     intro.style.display = "block";
-
     setTimeout(() => {
         intro.style.display = "none";
         titleScreen.style.display = "block";
@@ -346,7 +362,6 @@ window.addEventListener("DOMContentLoaded", () => {
         }, 3000);
     });
 });
-
 window.addEventListener("load", () => {
     const boardEl = document.getElementById("board");
 

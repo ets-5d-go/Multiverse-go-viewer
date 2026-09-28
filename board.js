@@ -1125,6 +1125,7 @@ window.stoneObjects = {};
 
 
 // ③ ランダム初手関数（loadとは関係ない“普通の関数定義”）
+
 function randomOpeningMoves() {
     for (let i = 0; i < 3; i++) {
         let x = Math.floor(Math.random() * SIZE);
@@ -1138,7 +1139,6 @@ function randomOpeningMoves() {
         removeCapturedStones(x, y, window.currentLayerIndex, color);
     }
 
-    // ランダム初手後に描画
     drawBoard();
     drawAllStones();
 }
