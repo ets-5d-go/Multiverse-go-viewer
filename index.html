@@ -315,6 +315,34 @@ body {
 
 <script>
 
+// ★ 白石カウンター（最初に必ず置く）
+let whiteCapturedCount = 0;
+
+function updateWhiteCapturedDisplay() {
+    const el = document.getElementById("whiteCaptured");
+    if (el) {
+        el.textContent = "取った白石：" + whiteCapturedCount;
+    }
+}
+
+// ★ 停止／クリアボタンのイベント登録（最重要）
+function registerClearBoard() {
+    const clearBoard = document.getElementById("clearBoard");
+    if (clearBoard) {
+        clearBoard.onclick = () => {
+
+            // ★ 動画停止
+            stopVideo();
+
+            // ★ 盤面初期化
+            initViewer();
+
+            // ★ 白石カウンターを必ずリセット
+            whiteCapturedCount = 0;
+            updateWhiteCapturedDisplay();
+        };
+    }
+}
 
 window.addEventListener("DOMContentLoaded", () => {
 
@@ -322,15 +350,16 @@ window.addEventListener("DOMContentLoaded", () => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("from") === "manual") {
 
-        // ★ 背景を宇宙にする（これが重要）
         document.body.style.backgroundImage = "url('space_nasa.jpg')";
-
         document.getElementById("titleScreen").style.display = "none";
         document.getElementById("gameContainer").classList.add("show");
+
         initViewer();
         window.viewerReady = true;
 
-        return;   // ★ タイトル画面の処理を完全にスキップ
+        registerClearBoard();   // ← ここで必ず有効化
+
+        return;
     }
 
     const intro = document.getElementById("photoIntro");
@@ -359,9 +388,12 @@ window.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => {
             initViewer();
             window.viewerReady = true;
+
+            registerClearBoard();   // ← ゲーム開始後にも必ず有効化
         }, 3000);
     });
 });
+
 window.addEventListener("load", () => {
     const boardEl = document.getElementById("board");
 
@@ -374,32 +406,30 @@ window.addEventListener("load", () => {
     });
 });
 
+// ★ 動画再生
 function playVideo(filename) {
     const video = document.getElementById("goVideo");
     video.style.display = "block";
     video.src = filename;
     video.play();
+
+    registerClearBoard();   // ← 動画ボタンを押したあとにも再登録
 }
 
+// ★ 動画停止
 function stopVideo() {
     const video = document.getElementById("goVideo");
     video.pause();
     video.currentTime = 0;
     video.style.display = "none";
 }
+
+// ★ アプリ終了
 function closeApp() {
     window.open('', '_self');
     window.close();
 }
-/* ★ 白石カウンター（ここに追加する） */
-let whiteCapturedCount = 0;
 
-function updateWhiteCapturedDisplay() {
-    const el = document.getElementById("whiteCaptured");
-    if (el) {
-        el.textContent = "取った白石：" + whiteCapturedCount;
-    }
-}
 </script>
 
 </body>
