@@ -227,11 +227,17 @@ body {
         <button class="videoButton blue" onclick="location.href='manual.html'">マニュアル</button>
     </div>
     <!-- ★ 終了ボタン（ここに追加） -->
-    <div style="margin-top:10px;">
-        <button class="videoButton blue" onclick="closeApp()">
-            終了
-        </button>
+
+ 
+
+<div style="margin-top:16px;">
+    <button id="exitButton" class="videoButton blue" style="font-size:16px;">
+        終了
+    </button>
+    <div style="font-size:14px; margin-top:4px; color:white;">
+        ※ブラウザの「×」
     </div>
+</div>
 </div> <!-- ★ titleScreen を閉じる -->
 
 <!-- ★ ゲーム本体 -->
@@ -249,15 +255,16 @@ body {
 
 <div id="layerButtons">
     <!-- ★ 戻るボタン（左上固定） -->
-    <button class="videoButton blue returnButton"
-            id="aiNormal"
-            onclick="location.href='index.html'"
-            style="color:red;">
-        戻る
-    </button>
 
 
 
+
+
+<button class="videoButton blue returnButton"
+        onclick="location.href='index.html'"
+        style="color:red;">
+    戻る
+</button>
     <button class="videoButton orange redBorder" id="modeHumanVsHuman">人間 vs 人間</button>
 
     <div class="layerGroup">
@@ -313,7 +320,13 @@ body {
 <script src="board.js"></script>
 <script src="viewer.js"></script>
 
+
 <script>
+// ★ 終了ボタンを毎回登録する（最重要）
+function registerExitButton() {
+    const exitButton = document.getElementById("exitButton");
+    if (exitButton) exitButton.onclick = closeApp;
+}
 
 // ★ 白石カウンター（最初に必ず置く）
 let whiteCapturedCount = 0;
@@ -325,7 +338,35 @@ function updateWhiteCapturedDisplay() {
     }
 }
 
-// ★ 停止／クリアボタンのイベント登録（最重要）
+/* ============================================================
+   ★ 動画再生（今回の復旧ポイント）
+   ============================================================ */
+function playVideo(filename) {
+    const video = document.getElementById("goVideo");
+    if (!video) return;
+
+    video.style.display = "block";
+    video.src = filename;
+    video.play();
+}
+
+/* ============================================================
+   ★ 動画停止（今回の復旧ポイント）
+   ============================================================ */
+function stopVideo() {
+    const video = document.getElementById("goVideo");
+    if (!video) return;
+
+    video.pause();
+    video.currentTime = 0;
+    video.style.display = "none";
+}
+
+/* ============================================================
+   ★ 停止／クリアボタンのイベント登録（最重要）
+   ============================================================ */
+
+
 function registerClearBoard() {
     const clearBoard = document.getElementById("clearBoard");
     if (clearBoard) {
@@ -334,45 +375,58 @@ function registerClearBoard() {
             // ★ 動画停止
             stopVideo();
 
-            // ★ 盤面初期化
+            // ★ 二次元盤＋三次元盤の完全初期化（board.js）
+            clearAllBoards();   // ← これが最重要！
+
+            // ★ 三次元盤の再構築（viewer.js）
             initViewer();
 
-            // ★ 白石カウンターを必ずリセット
+            // ★ 白石カウンターをリセット
             whiteCapturedCount = 0;
             updateWhiteCapturedDisplay();
         };
     }
 }
-
 window.addEventListener("DOMContentLoaded", () => {
 
-    // ★ manual.html から戻ってきたらタイトル画面をスキップ
     const params = new URLSearchParams(window.location.search);
-    if (params.get("from") === "manual") {
-
-        document.body.style.backgroundImage = "url('space_nasa.jpg')";
-        document.getElementById("titleScreen").style.display = "none";
-        document.getElementById("gameContainer").classList.add("show");
-
-        initViewer();
-        window.viewerReady = true;
-
-        registerClearBoard();   // ← ここで必ず有効化
-
-        return;
-    }
-
     const intro = document.getElementById("photoIntro");
     const titleScreen = document.getElementById("titleScreen");
     const startButton = document.getElementById("startButton");
     const gameContainer = document.getElementById("gameContainer");
 
+    // ★ manual.html → 戻る → タイトル画面
+    if (params.get("from") === "manual") {
+        intro.style.display = "none";
+        titleScreen.style.display = "block";
+        gameContainer.classList.remove("show");
+        return;
+    }
+
+    // ★ manual.html → 赤青黄 → ゲーム画面直行
+    if (params.get("from") === "manualStart") {
+        intro.style.display = "none";
+        titleScreen.style.display = "none";
+        gameContainer.classList.add("show");
+        document.body.style.backgroundImage = "url('space_nasa.jpg')";
+        initViewer();
+        window.viewerReady = true;
+        registerClearBoard();
+        return;
+    }
+
+    // ★ 通常起動 → 写真 → タイトル画面
     intro.style.display = "block";
     setTimeout(() => {
         intro.style.display = "none";
         titleScreen.style.display = "block";
+
+        // ★ ここで必ず登録する
+        registerClearBoard();
+
     }, 2000);
 
+    // ★ ゲーム開始ボタン
     startButton.addEventListener("click", () => {
         intro.style.display = "none";
         titleScreen.classList.add("hide");
@@ -388,49 +442,10 @@ window.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => {
             initViewer();
             window.viewerReady = true;
-
-            registerClearBoard();   // ← ゲーム開始後にも必ず有効化
+            registerClearBoard();
         }, 3000);
     });
 });
-
-window.addEventListener("load", () => {
-    const boardEl = document.getElementById("board");
-
-    boardEl.addEventListener("contextmenu", (e) => {
-        e.preventDefault();
-        let left = parseInt(boardEl.style.left || 0);
-        left -= 10;
-        if (left < 50) left = 50;
-        boardEl.style.left = left + "px";
-    });
-});
-
-// ★ 動画再生
-function playVideo(filename) {
-    const video = document.getElementById("goVideo");
-    video.style.display = "block";
-    video.src = filename;
-    video.play();
-
-    registerClearBoard();   // ← 動画ボタンを押したあとにも再登録
-}
-
-// ★ 動画停止
-function stopVideo() {
-    const video = document.getElementById("goVideo");
-    video.pause();
-    video.currentTime = 0;
-    video.style.display = "none";
-}
-
-// ★ アプリ終了
-function closeApp() {
-    window.open('', '_self');
-    window.close();
-}
-
 </script>
-
 </body>
 </html>

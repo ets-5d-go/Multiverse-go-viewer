@@ -37,6 +37,17 @@ function setLayer(z) {
     }
 }
 window.setLayer = setLayer;
+// ===============================
+// ★ 石オブジェクトを全部消す
+// ===============================
+function clearStones() {
+    for (let i = scene.children.length - 1; i >= 0; i--) {
+        const obj = scene.children[i];
+        if (obj.userData && obj.userData.isStone) {
+            scene.remove(obj);
+        }
+    }
+}
 
 // ===============================
 // 3D 石を置く（グローバル）
@@ -49,7 +60,7 @@ function addStone3D(x, y, color, layer) {
     });
 
     const stone = new THREE.Mesh(geometry, material);
-
+stone.userData.isStone = true;   // ★ これが重要
     const half = (BOARD_SIZE - 1) * BOARD_SPACING / 2;
     const posX = -half + x * BOARD_SPACING;
     const posZ = -half + y * BOARD_SPACING;
@@ -81,7 +92,7 @@ window.removeStone3D = removeStone3D;
 // 3D Viewer (Three.js)
 // ===============================
 function initViewer() {
-
+    clearStones();   // ★ 最重要：石を全部消す
     // 3D キャンバス
     const viewer = document.getElementById("viewer");
 

@@ -80,10 +80,12 @@ strong {
 </head>
 <body>
 
-<button class="videoButton blue" onclick="location.href='index.html'">
+
+
+<button class="videoButton blue"
+        onclick="localStorage.setItem('manualUsed', '1'); location.href='index.html'">
     戻る
 </button>
-
 <h1>五次元囲碁ビューア 操作マニュアル</h1>
 
 <div class="section">
@@ -93,8 +95,11 @@ strong {
 <p>
  <strong>三次元囲碁操作マニュアル（黄色ボタン）</strong>
  
-<button class="videoButton yellow" onclick="location.href='index.html?from=manualStart'">
-  ゲーム画面へ（黄色）  
+
+
+<button class="videoButton yellow"
+        onclick="localStorage.setItem('manualUsed', '1'); location.href='index.html?from=manualStart'">
+    ゲーム画面へ（黄色）
 </button>
 </p>
     1. 「人間対人間」ボタンを押し、入力層を選び、交点を選んで左クリックすると、黒,白石を交互に置けるよ。<br>
@@ -119,7 +124,10 @@ strong {
 <p>
 <strong>三次元囲碁研究マニュアル（青ボタン）</strong>
 
-<button class="videoButton blue" onclick="location.href='index.html?from=manualStart'">
+
+
+<button class="videoButton blue"
+        onclick="localStorage.setItem('manualUsed', '1'); location.href='index.html?from=manualStart'">
     ゲーム画面へ（青）
 </button>
 </p>
@@ -136,9 +144,12 @@ strong {
 <p>
 <strong>多次元囲碁動画（赤ボタン）</strong>
   
-<button class="videoButton red" onclick="location.href='index.html?from=manualStart'">
-         ゲーム画面へ（赤）
-    </button>
+
+
+<button class="videoButton red"
+        onclick="localStorage.setItem('manualUsed', '1'); location.href='index.html?from=manualStart'">
+    ゲーム画面へ（赤）
+</button>
 </p>
 <p>
 1. 二次元囲碁は2台のpcの通信系の囲碁ゲームだよ、石をとると、背後の宇宙服のアイテムが回転するよ。<br><br>
